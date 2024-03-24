@@ -1,8 +1,16 @@
 import { createElement, carImage } from '../components/functions';
-import { getCars, getCar, createCar, deleteCar, updateCar } from '../components/garageButtons';
-import { Car } from '../types/types';
+import {
+  getCars,
+  getCar,
+  createCar,
+  deleteCar,
+  updateCar,
+  getRandomCars,
+} from '../components/garageButtons';
+import { Car, CarCreate } from '../types/types';
 
 let selectedCar = 0;
+const generateCount = 100;
 
 export function garageInit(): void {
   const settingsDiv = createElement('div', ['settings']);
@@ -33,6 +41,13 @@ export function garageInit(): void {
   const raceBtn = createElement('button', ['button'], 'Race');
   const resetBtn = createElement('button', ['button'], 'Reset');
   const generateBtn = createElement('button', ['button'], 'Generate Cars');
+  generateBtn.addEventListener('click', async () => {
+    const cars: CarCreate[] = getRandomCars(generateCount);
+    const generator: Promise<void | Error>[] = cars.map((car) => createCar(car));
+    await Promise.all(generator);
+    const cars1 = (await getCars(1, 7)) as Car[];
+    drawCars(cars1);
+  });
   raceDiv.append(raceBtn, resetBtn, generateBtn);
   settingsDiv.append(btnDiv, createDiv, updateDiv, raceDiv);
   document.body.append(settingsDiv);
@@ -40,8 +55,7 @@ export function garageInit(): void {
   createCarBtn.addEventListener('click', async () => {
     createCar({ name: `${carName?.value}`, color: `${carColor?.value}` });
     console.log(carName?.value, carColor?.value);
-    const cars = (await getCars(1, 7)) as Car[];
-    drawCars(cars);
+    drawGarage();
   });
 
   updateCarBtn.addEventListener('click', async () => {
@@ -102,7 +116,6 @@ export function garageInit(): void {
       })
     );
   window.addEventListener('DOMContentLoaded', async () => {
-    const cars = (await getCars(1, 7)) as Car[];
-    drawCars(cars);
+    drawGarage();
   });
 }
