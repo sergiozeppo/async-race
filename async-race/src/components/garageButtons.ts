@@ -7,11 +7,13 @@ import { getRandomColor } from '../components/functions';
 
 const BASE = 'http://localhost:3000';
 const GARAGE = `${BASE}/garage`;
+export let carsCount: number;
 
 export async function getCars(page: number, limit: number): GetCarsResult {
   try {
     const response = await fetch(`${GARAGE}?_limit=${limit}&_page=${page}`);
     const cars: Car[] = await response.json();
+    carsCount = cars.length;
     console.log(cars);
     return cars;
   } catch (e) {
@@ -93,4 +95,15 @@ export function getRandomCars(count: number): CarCreate[] {
   return Array(count)
     .fill(null)
     .map(() => ({ name: getRandomModels(), color: getRandomColor() }));
+}
+
+export async function getCarsCount(): Promise<number | Error> {
+  try {
+    const response = await fetch(`${GARAGE}`);
+    const cars: Car[] = await response.json();
+    const carsCount = cars.length;
+    return carsCount;
+  } catch (e) {
+    return e as Error;
+  }
 }

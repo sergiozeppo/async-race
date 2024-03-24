@@ -6,13 +6,17 @@ import {
   deleteCar,
   updateCar,
   getRandomCars,
+  getCarsCount,
 } from '../components/garageButtons';
 import { Car, CarCreate } from '../types/types';
 
 let selectedCar = 0;
+let page = 1;
+const pageLimit = 7;
 const generateCount = 100;
 
-export function garageInit(): void {
+export async function garageInit(): Promise<void> {
+  const carsCount = (await getCarsCount()) as number;
   const settingsDiv = createElement('div', ['settings']);
   const btnDiv = createElement('div', ['wrap-div']);
   const garageView = createElement('button', ['button'], 'To Garage');
@@ -45,12 +49,10 @@ export function garageInit(): void {
     const cars: CarCreate[] = getRandomCars(generateCount);
     const generator: Promise<void | Error>[] = cars.map((car) => createCar(car));
     await Promise.all(generator);
-    const cars1 = (await getCars(1, 7)) as Car[];
+    const cars1 = (await getCars(page, pageLimit)) as Car[];
     drawCars(cars1);
   });
   raceDiv.append(raceBtn, resetBtn, generateBtn);
-  settingsDiv.append(btnDiv, createDiv, updateDiv, raceDiv);
-  document.body.append(settingsDiv);
 
   createCarBtn.addEventListener('click', async () => {
     createCar({ name: `${carName?.value}`, color: `${carColor?.value}` });
@@ -64,8 +66,13 @@ export function garageInit(): void {
     selectedCar = 0;
   });
 
+  const title = createElement('h1', ['title'], `Garage (${carsCount})`);
+  const pageN = createElement('h2', ['pageN'], `Page #${page}`);
+  settingsDiv.append(btnDiv, createDiv, updateDiv, raceDiv, title, pageN);
+  document.body.append(settingsDiv);
+
   async function drawGarage(): Promise<void> {
-    const cars = (await getCars(1, 7)) as Car[];
+    const cars = (await getCars(page, pageLimit)) as Car[];
     drawCars(cars);
   }
   drawGarage();
@@ -105,6 +112,48 @@ export function garageInit(): void {
       listCars.append(CarEl);
     });
     document.body.append(listCars);
+    const carsCount = (await getCarsCount()) as number;
+    checkPagination(carsCount, page, pageLimit);
+  }
+
+  async function checkPagination(total: number, currPage: number, limit: number): Promise<void> {
+    if (document.querySelector('.wrap-div-control')) {
+      const delItem = document.querySelector('.wrap-div-control');
+      delItem?.remove();
+    }
+    const wrapDiv2 = createElement('div', ['wrap-div-control']) as HTMLDivElement;
+    const prevBtn = createElement('button', ['button'], 'PREV') as HTMLButtonElement;
+    const nextBtn = createElement('button', ['button'], 'NEXT') as HTMLButtonElement;
+
+    wrapDiv2.append(prevBtn, nextBtn);
+    document.body.append(wrapDiv2);
+    const isLastPage: boolean = total / (currPage * limit) <= 1;
+
+    if (currPage === 1) {
+      prevBtn.disabled = true;
+    } else {
+      prevBtn.disabled = false;
+      prevBtn.addEventListener('click', async () => {
+        page -= 1;
+        drawGarage();
+        pageN.textContent = `Page #${page}`;
+        const carsCount = (await getCarsCount()) as number;
+        checkPagination(carsCount, page, pageLimit);
+      });
+    }
+
+    if (isLastPage) {
+      nextBtn.disabled = true;
+    } else {
+      nextBtn.disabled = false;
+      nextBtn.addEventListener('click', async () => {
+        page += 1;
+        drawGarage();
+        pageN.textContent = `Page #${page}`;
+        const carsCount = (await getCarsCount()) as number;
+        checkPagination(carsCount, page, pageLimit);
+      });
+    }
   }
 
   const removeArr = document.querySelectorAll('.button-remove');

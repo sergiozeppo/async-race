@@ -41,3 +41,10 @@ export function getRandomColor(): string {
   }
   return color;
 }
+
+export function deleteItems(div: HTMLDivElement, tag: string): void {
+  const cards = div.querySelectorAll(tag);
+  for (let i = 0; i < cards.length; i += 1) {
+    cards[i].remove();
+  }
+}
