@@ -2,6 +2,7 @@ import './style.css';
 
 const BASE = 'http://localhost:3000';
 const GARAGE = `${BASE}/garage`;
+let selectedCar = 0;
 
 export interface Car {
   name: string;
@@ -92,7 +93,7 @@ async function getCars(page: number, limit: number): GetCarsResult {
   }
 }
 
-async function getCar(id: number): GetCarResult {
+async function getCar(id: number): Promise<Car> {
   try {
     const response = await fetch(`${GARAGE}/${id}`);
     const empty: Car = {
@@ -102,7 +103,6 @@ async function getCar(id: number): GetCarResult {
     };
     if (response.status === 200) {
       const data: Car = await response.json();
-
       return data;
     }
     return empty;
@@ -151,7 +151,7 @@ async function updateCar(id: number, car: CarCreate): Promise<void | Error> {
       },
       body: JSON.stringify(car),
     });
-
+    getCars(1, 7);
     if (result.status === 200) return;
     if (result.status === 404) return;
   } catch (e) {
@@ -163,6 +163,10 @@ createCarBtn.addEventListener('click', () => {
   createCar({ name: `${carName?.value}`, color: `${carColor?.value}` });
   console.log(carName?.value, carColor?.value);
   console.log(getCars(1, 7));
+});
+
+updateCarBtn.addEventListener('click', async () => {
+  updateCar(selectedCar, { name: `${newCarName?.value}`, color: `${newCarColor?.value}` });
 });
 
 export function carImage(color: string): string {
@@ -186,6 +190,13 @@ async function drawCars(cars: Car[]): Promise<void> {
     const selectBtn = createElement('button', ['button', 'button-select'], 'SELECT');
     const removeBtn = createElement('button', ['button', 'button-remove'], 'REMOVE');
     selectBtn.id = `${car.id}`;
+    selectBtn.addEventListener('click', async () => {
+      selectedCar = car.id;
+      const updatingCar = await getCar(selectedCar);
+      newCarName.placeholder = `${updatingCar.name}`;
+      newCarName.value = `${updatingCar.name}`;
+      newCarColor.value = `${updatingCar.color}`;
+    });
     removeBtn.id = `${car.id}`;
     removeBtn.addEventListener('click', () => {
       deleteCar(car.id);
@@ -203,14 +214,6 @@ async function drawCars(cars: Car[]): Promise<void> {
   });
   document.body.append(listCars);
 }
-
-// console.log(getCars(1, 7));
-// console.log(getCar(3));
-// console.log(createCar({ name: 'Ferrari', color: '#FF0000' }));
-// console.log(getCars(1, 7));
-// console.log(deleteCar(2));
-// console.log(updateCar(5, { name: 'Maserati', color: '#0000FF' }));
-// console.log(getCars(1, 7));
 
 const removeArr = document.querySelectorAll('.button-remove');
 console.log(removeArr);
