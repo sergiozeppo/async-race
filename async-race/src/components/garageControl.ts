@@ -1,20 +1,18 @@
 import '../style.css';
 import { HTTPStatusCode } from '../types/httpstatuscode';
-import { GetCarsResult, Car, CarCreate } from '../types/types';
-import { brands } from '../components/brands';
-import { models } from '../components/models';
-import { getRandomColor } from '../components/functions';
+import { GetCarsResult, Car, CarCreate, CarEngine } from '../types/types';
+import { brands } from './brands';
+import { models } from './models';
+import { getRandomColor } from './functions';
 
 const BASE = 'http://localhost:3000';
 const GARAGE = `${BASE}/garage`;
-export let carsCount: number;
+const ENGINE = `${BASE}/engine`;
 
 export async function getCars(page: number, limit: number): GetCarsResult {
   try {
     const response = await fetch(`${GARAGE}?_limit=${limit}&_page=${page}`);
     const cars: Car[] = await response.json();
-    carsCount = cars.length;
-    console.log(cars);
     return cars;
   } catch (e) {
     return Error;
@@ -107,3 +105,23 @@ export async function getCarsCount(): Promise<number | Error> {
     return e as Error;
   }
 }
+
+export const toggleCarsEngine = async (
+  id: number,
+  status: 'started' | 'stopped'
+): Promise<CarEngine | null | void | Error> => {
+  try {
+    const result = await fetch(`${ENGINE}?id=${id}&status=${status}`, {
+      method: 'PATCH',
+    });
+
+    if (result.status === HTTPStatusCode._OK) {
+      const data: CarEngine = await result.json();
+      return data;
+    }
+
+    return null;
+  } catch (e) {
+    return e as Error;
+  }
+};

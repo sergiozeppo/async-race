@@ -1,4 +1,4 @@
-import { createElement, carImage } from '../components/functions';
+import { createElement, carImage, flagImage } from '../components/functions';
 import {
   getCars,
   getCar,
@@ -7,8 +7,9 @@ import {
   updateCar,
   getRandomCars,
   getCarsCount,
-} from '../components/garageButtons';
-import { Car, CarCreate } from '../types/types';
+  toggleCarsEngine,
+} from '../components/garageControl';
+import { Car, CarCreate, CarEngine } from '../types/types';
 
 let selectedCar = 0;
 let page = 1;
@@ -45,6 +46,7 @@ export async function garageInit(): Promise<void> {
   const raceBtn = createElement('button', ['button'], 'Race');
   const resetBtn = createElement('button', ['button'], 'Reset');
   const generateBtn = createElement('button', ['button'], 'Generate Cars');
+
   generateBtn.addEventListener('click', async () => {
     const cars: CarCreate[] = getRandomCars(generateCount);
     const generator: Promise<void | Error>[] = cars.map((car) => createCar(car));
@@ -77,6 +79,22 @@ export async function garageInit(): Promise<void> {
   }
   drawGarage();
 
+  async function startEngine(id: number): Promise<CarEngine | void | Error> {
+    const data = await toggleCarsEngine(id, 'started');
+    if (data) {
+      console.log(data);
+      return data;
+    }
+  }
+
+  async function stopEngine(id: number): Promise<CarEngine | void | Error> {
+    const data = await toggleCarsEngine(id, 'stopped');
+    if (data) {
+      console.log(data);
+      return data;
+    }
+  }
+
   const listCars = document.createElement('ul');
   async function drawCars(cars: Car[]): Promise<void> {
     if (listCars.innerHTML !== '') listCars.innerHTML = '';
@@ -102,12 +120,22 @@ export async function garageInit(): Promise<void> {
       });
       const h3 = createElement('h3', ['list-item'], car.name);
       wrapDiv1.append(selectBtn, removeBtn, h3);
-      const wrapDiv2 = createElement('div', ['wrap-div']);
+      const wrapDiv2 = createElement('div', ['wrap-div', 'race-track']);
       const aBtn = createElement('button', ['button', 'neon'], 'A');
+
       const bBtn = createElement('button', ['button', 'neon'], 'B');
+      bBtn.addEventListener('click', async () => {
+        stopEngine(car.id);
+      });
       const carSVG = document.createElement('div');
-      wrapDiv2.append(aBtn, bBtn, carSVG);
+      const flagSVG = document.createElement('div');
+      aBtn.addEventListener('click', async () => {
+        startEngine(car.id);
+      });
+      wrapDiv2.append(aBtn, bBtn, carSVG, flagSVG);
       carSVG.innerHTML = carImage(car.color);
+      flagSVG.innerHTML = flagImage();
+      flagSVG.classList.add('flag');
       CarEl.append(wrapDiv1, wrapDiv2);
       listCars.append(CarEl);
     });

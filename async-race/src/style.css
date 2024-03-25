@@ -31,6 +31,7 @@ body {
   flex-direction: column;
   flex-wrap: wrap;
   align-content: flex-start;
+  align-items: flex-start;
 }
 
 h1 {
@@ -88,6 +89,14 @@ button:focus-visible {
   align-content: center;
   justify-content: flex-start;
   align-items: center;
+}
+
+.race-track {
+  width: 100vw;
+}
+
+.flag {
+  margin-left: calc(100vw - 400px);
 }
 
 .settings {

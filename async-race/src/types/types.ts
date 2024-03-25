@@ -14,5 +14,10 @@ export interface GarageData {
   count: number;
 }
 
+export interface CarEngine {
+  velocity: number;
+  distance: number;
+}
+
 export type GetCarsResult = Promise<Car[] | ErrorConstructor>;
 export type GetCarResult = Promise<Car | ErrorConstructor>;
