@@ -151,14 +151,47 @@ export async function carDriveMode(
   }
 }
 
-export function animateCar(time: number, carImage: HTMLDivElement): void {
-  const svg = carImage.querySelector('svg') as SVGElement;
-  let left = 0;
-  function animate() {
-    svg.style.transform = `translateX(${left}px)`;
-    left += 5;
-    requestAnimationFrame(animate);
-  }
+export function animateCar(id: number, time: number, carImage: HTMLDivElement): void {
+  const carStyle = getComputedStyle(carImage);
+  const parentStyle = getComputedStyle(carImage.parentElement as HTMLDivElement);
+  const carWidth = parseInt(carStyle.width);
+  const parentWidth = parseInt(parentStyle.width);
 
-  requestAnimationFrame(animate);
+  const svg = carImage.querySelector('svg') as SVGElement;
+
+  const animation = svg.animate(
+    [
+      { transform: 'translateX(0px)' },
+      { transform: `translateX(calc(${parentWidth}px - ${carWidth * 2}px))` },
+    ],
+    {
+      duration: time,
+      easing: 'ease-in-out',
+    }
+  );
+  animation.id = `${id}`;
+  animation.play();
+  animation.onfinish = (): void => {
+    svg.style.transform = `translateX(calc(${parentWidth}px - ${carWidth * 2}px))`;
+  };
+  (async () => {
+    try {
+      const response = await fetch(`${ENGINE}?id=${id}&status=drive`, {
+        method: 'PATCH',
+      });
+      if (!response.ok) {
+        throw new Error('Server error');
+      }
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      animation.pause();
+      console.error('Error:', error);
+    }
+  })();
+}
+
+export function resetCar(carImage: HTMLDivElement): void {
+  const svg = carImage.querySelector('svg') as SVGElement;
+  svg.style.transform = 'translateX(0px)';
 }

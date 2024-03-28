@@ -8,7 +8,8 @@ import {
   getRandomCars,
   getCarsCount,
   toggleCarsEngine,
-  carDriveMode,
+  // carDriveMode,
+  resetCar,
   animateCar,
 } from '../components/garageControl';
 import { Car, CarCreate, CarEngine } from '../types/types';
@@ -88,7 +89,7 @@ export async function garageInit(): Promise<void> {
       console.log(data);
       const time = Math.round(data.distance / data.velocity);
       const car = document.querySelector(`.svg-${id}`) as HTMLDivElement;
-      animateCar(time, car);
+      animateCar(id, time, car);
       return [data, null];
     }
   }
@@ -133,10 +134,11 @@ export async function garageInit(): Promise<void> {
       wrapDiv1.append(selectBtn, removeBtn, h3);
       const wrapDiv2 = createElement('div', ['wrap-div', 'race-track']);
       const aBtn = createElement('button', ['button', 'neon'], 'A');
-
+      aBtn.id = `${car.id}`;
       const bBtn = createElement('button', ['button', 'neon'], 'B');
-
+      bBtn.id = `${car.id}`;
       const carSVG = document.createElement('div');
+      // const svg = carSVG.querySelector('svg') as SVGElement;
       const flagSVG = document.createElement('div');
 
       wrapDiv2.append(aBtn, bBtn, carSVG, flagSVG);
@@ -146,11 +148,13 @@ export async function garageInit(): Promise<void> {
       flagSVG.classList.add('flag');
       aBtn.addEventListener('click', async () => {
         await startEngine(car.id);
-        await carDriveMode(car.id);
       });
       bBtn.addEventListener('click', async () => {
+        document.getAnimations().forEach((anime) => {
+          if (anime.id === bBtn.id) anime.cancel();
+        });
+        resetCar(carSVG);
         stopEngine(car.id);
-        carSVG.style.transform = `translateX(0px)`;
       });
       CarEl.append(wrapDiv1, wrapDiv2);
       listCars.append(CarEl);
