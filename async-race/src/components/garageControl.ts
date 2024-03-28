@@ -4,6 +4,7 @@ import { GetCarsResult, Car, CarCreate, CarEngine } from '../types/types';
 import { brands } from './brands';
 import { models } from './models';
 import { getRandomColor } from './functions';
+import { unexpStatus } from './errorMessages';
 
 const BASE = 'http://localhost:3000';
 const GARAGE = `${BASE}/garage`;
@@ -106,10 +107,10 @@ export async function getCarsCount(): Promise<number | Error> {
   }
 }
 
-export const toggleCarsEngine = async (
+export async function toggleCarsEngine(
   id: number,
   status: 'started' | 'stopped'
-): Promise<CarEngine | null | void | Error> => {
+): Promise<[CarEngine, null] | [null, Error]> {
   try {
     const result = await fetch(`${ENGINE}?id=${id}&status=${status}`, {
       method: 'PATCH',
@@ -117,11 +118,47 @@ export const toggleCarsEngine = async (
 
     if (result.status === HTTPStatusCode._OK) {
       const data: CarEngine = await result.json();
+      return [data, null];
+    }
+    const func = `I can't start or stop engine`;
+    return [null, unexpStatus(func)];
+  } catch (e) {
+    return [null, e as Error];
+  }
+}
+
+export async function carDriveMode(
+  id: number
+): Promise<{ success: boolean } | null | void | Error> {
+  try {
+    const result = await fetch(`${ENGINE}?id=${id}&status=drive`, {
+      method: 'PATCH',
+    });
+    if (result.status === HTTPStatusCode._OK) {
+      console.log(result);
+      const data: { success: boolean } = await result.json();
+      console.log(data);
       return data;
+    }
+
+    if (result.status === HTTPStatusCode._ENGINE_BROKE) {
+      console.warn(`Engine is broken`);
     }
 
     return null;
   } catch (e) {
     return e as Error;
   }
-};
+}
+
+export function animateCar(time: number, carImage: HTMLDivElement): void {
+  const svg = carImage.querySelector('svg') as SVGElement;
+  let left = 0;
+  function animate() {
+    svg.style.transform = `translateX(${left}px)`;
+    left += 5;
+    requestAnimationFrame(animate);
+  }
+
+  requestAnimationFrame(animate);
+}

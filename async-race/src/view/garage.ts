@@ -8,6 +8,8 @@ import {
   getRandomCars,
   getCarsCount,
   toggleCarsEngine,
+  carDriveMode,
+  animateCar,
 } from '../components/garageControl';
 import { Car, CarCreate, CarEngine } from '../types/types';
 
@@ -79,19 +81,28 @@ export async function garageInit(): Promise<void> {
   }
   drawGarage();
 
-  async function startEngine(id: number): Promise<CarEngine | void | Error> {
-    const data = await toggleCarsEngine(id, 'started');
-    if (data) {
+  async function startEngine(id: number): Promise<[CarEngine, null] | void | [null, Error]> {
+    const [data, error] = await toggleCarsEngine(id, 'started');
+    if (error) console.log(error);
+    else {
       console.log(data);
-      return data;
+      const time = Math.round(data.distance / data.velocity);
+      const car = document.querySelector(`.svg-${id}`) as HTMLDivElement;
+      animateCar(time, car);
+      return [data, null];
     }
   }
 
-  async function stopEngine(id: number): Promise<CarEngine | void | Error> {
-    const data = await toggleCarsEngine(id, 'stopped');
-    if (data) {
-      console.log(data);
-      return data;
+  async function stopEngine(id: number): Promise<[CarEngine, null] | void | [null, Error]> {
+    try {
+      const [data, error] = await toggleCarsEngine(id, 'stopped');
+      if (error) console.log(error);
+      else {
+        console.log(data);
+        return [data, null];
+      }
+    } catch (e) {
+      return [null, e as Error];
     }
   }
 
@@ -124,18 +135,23 @@ export async function garageInit(): Promise<void> {
       const aBtn = createElement('button', ['button', 'neon'], 'A');
 
       const bBtn = createElement('button', ['button', 'neon'], 'B');
-      bBtn.addEventListener('click', async () => {
-        stopEngine(car.id);
-      });
+
       const carSVG = document.createElement('div');
       const flagSVG = document.createElement('div');
-      aBtn.addEventListener('click', async () => {
-        startEngine(car.id);
-      });
+
       wrapDiv2.append(aBtn, bBtn, carSVG, flagSVG);
       carSVG.innerHTML = carImage(car.color);
+      carSVG.classList.add(`svg-${car.id}`);
       flagSVG.innerHTML = flagImage();
       flagSVG.classList.add('flag');
+      aBtn.addEventListener('click', async () => {
+        await startEngine(car.id);
+        await carDriveMode(car.id);
+      });
+      bBtn.addEventListener('click', async () => {
+        stopEngine(car.id);
+        carSVG.style.transform = `translateX(0px)`;
+      });
       CarEl.append(wrapDiv1, wrapDiv2);
       listCars.append(CarEl);
     });
