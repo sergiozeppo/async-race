@@ -56,6 +56,7 @@ export async function garageInit(): Promise<void> {
     await Promise.all(generator);
     const cars1 = (await getCars(page, pageLimit)) as Car[];
     drawCars(cars1);
+    drawGarage();
   });
   raceDiv.append(raceBtn, resetBtn, generateBtn);
 
@@ -78,6 +79,8 @@ export async function garageInit(): Promise<void> {
 
   async function drawGarage(): Promise<void> {
     const cars = (await getCars(page, pageLimit)) as Car[];
+    const carsCount = (await getCarsCount()) as number;
+    title.textContent = `Garage (${carsCount})`;
     drawCars(cars);
   }
   drawGarage();
