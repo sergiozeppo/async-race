@@ -9,15 +9,25 @@ import {
   getCarsCount,
   toggleCarsEngine,
   // carDriveMode,
+  // controller,
   resetCar,
   animateCar,
 } from '../components/garageControl';
-import { Car, CarCreate, CarEngine } from '../types/types';
+import { Car, CarCreate, CarEngine, Winner } from '../types/types';
+import { unexpStatus } from '../components/errorMessages';
 
 let selectedCar = 0;
 let page = 1;
+let isRace = false;
 const pageLimit = 7;
 const generateCount = 100;
+const winCar: Winner = {
+  name: '',
+  color: '',
+  id: -1,
+  time: 0,
+  count: 0,
+};
 
 export async function garageInit(): Promise<void> {
   const carsCount = (await getCarsCount()) as number;
@@ -47,7 +57,42 @@ export async function garageInit(): Promise<void> {
 
   const raceDiv = createElement('div', ['wrap-div']);
   const raceBtn = createElement('button', ['button'], 'Race');
+  raceBtn.addEventListener('click', async () => {
+    const cars1 = (await getCars(page, pageLimit)) as Car[];
+    const promises: Promise<[CarEngine, null] | [null, Error]>[] = [];
+    cars1.forEach((car) => {
+      isRace = true;
+      const startCar = startEngine(car.id, winCar, carColor?.value, isRace);
+      // const carItem = getCar(car.id);
+      promises.push(startCar);
+    });
+    Promise.race(promises).then(() => {
+      isRace = false;
+      console.log(winCar);
+    });
+    // .then((result) => {
+    //   if (result) {
+    //     const [car, error] = result;
+    //     if (!error && car) console.log((Math.round(car.distance / car.velocity) / 1000).toFixed(2));
+    //   }
+    // });
+  });
+
   const resetBtn = createElement('button', ['button'], 'Reset');
+  resetBtn.addEventListener('click', async () => {
+    // const controller = new AbortController();
+    const cars1 = (await getCars(page, pageLimit)) as Car[];
+    cars1.forEach((car) => {
+      const SVGDiv = document.querySelector(`.svg-${car.id}`) as HTMLDivElement;
+      resetCar(SVGDiv);
+      stopEngine(car.id);
+      isRace = false;
+      // controller.abort();
+    });
+    document.getAnimations().forEach((anime) => {
+      anime.cancel();
+    });
+  });
   const generateBtn = createElement('button', ['button'], 'Generate Cars');
 
   generateBtn.addEventListener('click', async () => {
@@ -85,19 +130,26 @@ export async function garageInit(): Promise<void> {
   }
   drawGarage();
 
-  async function startEngine(id: number): Promise<[CarEngine, null] | void | [null, Error]> {
+  async function startEngine(
+    id: number,
+    winner: Winner,
+    color: string,
+    race: boolean
+  ): Promise<[CarEngine, null] | [null, Error]> {
     const [data, error] = await toggleCarsEngine(id, 'started');
     if (error) console.log(error);
     else {
       console.log(data);
       const time = Math.round(data.distance / data.velocity);
       const car = document.querySelector(`.svg-${id}`) as HTMLDivElement;
-      animateCar(id, time, car);
+      animateCar(id, time, car, winner, color, race);
       return [data, null];
     }
+    const func = `I can't start or stop engine`;
+    return [null, unexpStatus(func)];
   }
 
-  async function stopEngine(id: number): Promise<[CarEngine, null] | void | [null, Error]> {
+  async function stopEngine(id: number): Promise<[CarEngine, null] | [null, Error]> {
     try {
       const [data, error] = await toggleCarsEngine(id, 'stopped');
       if (error) console.log(error);
@@ -108,6 +160,8 @@ export async function garageInit(): Promise<void> {
     } catch (e) {
       return [null, e as Error];
     }
+    const func = `I can't start or stop engine`;
+    return [null, unexpStatus(func)];
   }
 
   const listCars = document.createElement('ul');
@@ -150,7 +204,7 @@ export async function garageInit(): Promise<void> {
       flagSVG.innerHTML = flagImage();
       flagSVG.classList.add('flag');
       aBtn.addEventListener('click', async () => {
-        await startEngine(car.id);
+        await startEngine(car.id, winCar, car.color, isRace);
       });
       bBtn.addEventListener('click', async () => {
         document.getAnimations().forEach((anime) => {

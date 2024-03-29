@@ -1,3 +1,5 @@
+import { Winner } from '../types/types';
+
 export function createElement(
   tag: string,
   classes?: string[],
@@ -55,4 +57,31 @@ export function deleteItems(div: HTMLDivElement, tag: string): void {
   for (let i = 0; i < cards.length; i += 1) {
     cards[i].remove();
   }
+}
+
+export function winnerModal(winner: Winner): void {
+  const modal = createElement('div', ['modal', 'visible'], '');
+  const resultCreate = createElement('div', ['result'], '', modal);
+  const greetCreate = createElement(
+    'h3',
+    ['greeting'],
+    `The car ${winner.name} won the race with ${(winner.time / 1000).toFixed(2)}!`
+  );
+  resultCreate.appendChild(greetCreate);
+  // const acceptButton = createElement('button', [], `Yes`, resultCreate);
+  // const declineButton = createElement('button', [], `No`, resultCreate);
+  document.body.appendChild(modal);
+  // acceptButton.addEventListener('click', () => {
+  //   modal.classList?.remove('visible');
+  //   delete localStorage.user;
+  //   delete localStorage.audiohint;
+  //   delete localStorage.texthint;
+  //   const bodyChild = Array.from(document.body.children);
+  //   bodyChild.forEach((child) => document.body.removeChild(child));
+  //   // location.reload();
+  // });
+  window.addEventListener('click', () => {
+    modal.classList?.remove('visible');
+    document.body?.removeChild(modal);
+  });
 }

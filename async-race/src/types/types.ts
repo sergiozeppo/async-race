@@ -19,5 +19,10 @@ export interface CarEngine {
   distance: number;
 }
 
+export interface Winner extends Car {
+  time: number;
+  count: number;
+}
+
 export type GetCarsResult = Promise<Car[] | ErrorConstructor>;
 export type GetCarResult = Promise<Car | ErrorConstructor>;

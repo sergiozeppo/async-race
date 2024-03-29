@@ -1,14 +1,15 @@
 import '../style.css';
 import { HTTPStatusCode } from '../types/httpstatuscode';
-import { GetCarsResult, Car, CarCreate, CarEngine } from '../types/types';
+import { GetCarsResult, Car, CarCreate, CarEngine, Winner } from '../types/types';
 import { brands } from './brands';
 import { models } from './models';
-import { getRandomColor } from './functions';
+import { getRandomColor, winnerModal } from './functions';
 import { unexpStatus } from './errorMessages';
 
 const BASE = 'http://localhost:3000';
 const GARAGE = `${BASE}/garage`;
 const ENGINE = `${BASE}/engine`;
+let isWin = false;
 
 export async function getCars(page: number, limit: number): GetCarsResult {
   try {
@@ -150,13 +151,21 @@ export async function carDriveMode(
     return e as Error;
   }
 }
+// export const controller = new AbortController();
 
-export function animateCar(id: number, time: number, carImage: HTMLDivElement): void {
+export function animateCar(
+  id: number,
+  time: number,
+  carImage: HTMLDivElement,
+  winner: Winner,
+  color: string,
+  race: boolean
+): [number, number] {
   const carStyle = getComputedStyle(carImage);
   const parentStyle = getComputedStyle(carImage.parentElement as HTMLDivElement);
   const carWidth = parseInt(carStyle.width);
   const parentWidth = parseInt(parentStyle.width);
-
+  // const signal = controller.signal;
   const svg = carImage.querySelector('svg') as SVGElement;
 
   const animation = svg.animate(
@@ -178,17 +187,42 @@ export function animateCar(id: number, time: number, carImage: HTMLDivElement): 
     try {
       const response = await fetch(`${ENGINE}?id=${id}&status=drive`, {
         method: 'PATCH',
+        // signal,
       });
       if (!response.ok) {
         throw new Error('Server error');
       }
+      // if (signal.aborted) {
+      //   if (signal.reason) {
+      //     console.log(`Request aborted with reason: ${signal.reason}`);
+      //   } else {
+      //     console.log('Request aborted but no reason was given.');
+      //   }
+      // }
       const data = await response.json();
+      if (race) {
+        if (!isWin) {
+          const car = await getCar(id);
+          winner.id = car.id;
+          winner.name = car.name;
+          winner.color = car.color;
+          winner.time = time;
+          winner.count += 1;
+          race = false;
+          isWin = true;
+          if (isWin) {
+            winnerModal(winner);
+          }
+        }
+      }
       console.log(data);
+      console.log(winner);
     } catch (error) {
       animation.pause();
       console.error('Error:', error);
     }
   })();
+  return [id, time];
 }
 
 export function resetCar(carImage: HTMLDivElement): void {
