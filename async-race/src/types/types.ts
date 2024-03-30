@@ -24,5 +24,16 @@ export interface Winner extends Car {
   count: number;
 }
 
+export interface Win {
+  id: number;
+  wins: number;
+  time: number;
+}
+
+export interface UpdateWin {
+  wins: number;
+  time: number;
+}
+
 export type GetCarsResult = Promise<Car[] | ErrorConstructor>;
 export type GetCarResult = Promise<Car | ErrorConstructor>;

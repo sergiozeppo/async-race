@@ -8,10 +8,11 @@ import {
   getRandomCars,
   getCarsCount,
   toggleCarsEngine,
-  // carDriveMode,
-  // controller,
+  resetRace,
   resetCar,
   animateCar,
+  getWinner,
+  deleteWinner,
 } from '../components/garageControl';
 import { Car, CarCreate, CarEngine, Winner } from '../types/types';
 import { unexpStatus } from '../components/errorMessages';
@@ -58,11 +59,12 @@ export async function garageInit(): Promise<void> {
   const raceDiv = createElement('div', ['wrap-div']);
   const raceBtn = createElement('button', ['button'], 'Race');
   raceBtn.addEventListener('click', async () => {
+    resetRace();
     const cars1 = (await getCars(page, pageLimit)) as Car[];
     const promises: Promise<[CarEngine, null] | [null, Error]>[] = [];
     cars1.forEach((car) => {
       isRace = true;
-      const startCar = startEngine(car.id, winCar, carColor?.value, isRace);
+      const startCar = startEngine(car.id, winCar, isRace);
       // const carItem = getCar(car.id);
       promises.push(startCar);
     });
@@ -133,7 +135,6 @@ export async function garageInit(): Promise<void> {
   async function startEngine(
     id: number,
     winner: Winner,
-    color: string,
     race: boolean
   ): Promise<[CarEngine, null] | [null, Error]> {
     const [data, error] = await toggleCarsEngine(id, 'started');
@@ -142,7 +143,7 @@ export async function garageInit(): Promise<void> {
       console.log(data);
       const time = Math.round(data.distance / data.velocity);
       const car = document.querySelector(`.svg-${id}`) as HTMLDivElement;
-      animateCar(id, time, car, winner, color, race);
+      animateCar(id, time, car, winner, race);
       return [data, null];
     }
     const func = `I can't start or stop engine`;
@@ -183,8 +184,10 @@ export async function garageInit(): Promise<void> {
         newCarColor.value = `${updatingCar.color}`;
       });
       removeBtn.id = `${car.id}`;
-      removeBtn.addEventListener('click', () => {
+      removeBtn.addEventListener('click', async () => {
         deleteCar(car.id);
+        const isWinCar = await getWinner(car.id);
+        if (isWinCar) deleteWinner(car.id);
         drawGarage();
       });
       const h3 = createElement('h3', ['list-item'], car.name);
@@ -204,7 +207,7 @@ export async function garageInit(): Promise<void> {
       flagSVG.innerHTML = flagImage();
       flagSVG.classList.add('flag');
       aBtn.addEventListener('click', async () => {
-        await startEngine(car.id, winCar, car.color, isRace);
+        await startEngine(car.id, winCar, isRace);
       });
       bBtn.addEventListener('click', async () => {
         document.getAnimations().forEach((anime) => {
@@ -264,8 +267,10 @@ export async function garageInit(): Promise<void> {
   const removeArr = document.querySelectorAll('.button-remove');
   if (removeArr)
     removeArr.forEach((btn, key) =>
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         deleteCar(key);
+        const isWinCar = await getWinner(key);
+        if (isWinCar) deleteWinner(key);
         drawGarage();
       })
     );

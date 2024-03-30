@@ -65,8 +65,9 @@ export function winnerModal(winner: Winner): void {
   const greetCreate = createElement(
     'h3',
     ['greeting'],
-    `The car ${winner.name} won the race with ${(winner.time / 1000).toFixed(2)}!`
+    ` The car ${winner.name} won the race with the best time ${(winner.time / 1000).toFixed(2)}!`
   );
+  greetCreate.innerHTML += `<br>${carImage(winner.color)}`;
   resultCreate.appendChild(greetCreate);
   // const acceptButton = createElement('button', [], `Yes`, resultCreate);
   // const declineButton = createElement('button', [], `No`, resultCreate);
@@ -82,6 +83,6 @@ export function winnerModal(winner: Winner): void {
   // });
   window.addEventListener('click', () => {
     modal.classList?.remove('visible');
-    document.body?.removeChild(modal);
+    modal.remove();
   });
 }

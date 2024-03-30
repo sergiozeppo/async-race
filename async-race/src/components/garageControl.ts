@@ -1,6 +1,6 @@
 import '../style.css';
 import { HTTPStatusCode } from '../types/httpstatuscode';
-import { GetCarsResult, Car, CarCreate, CarEngine, Winner } from '../types/types';
+import { GetCarsResult, Car, CarCreate, CarEngine, Winner, Win, UpdateWin } from '../types/types';
 import { brands } from './brands';
 import { models } from './models';
 import { getRandomColor, winnerModal } from './functions';
@@ -9,6 +9,7 @@ import { unexpStatus } from './errorMessages';
 const BASE = 'http://localhost:3000';
 const GARAGE = `${BASE}/garage`;
 const ENGINE = `${BASE}/engine`;
+const WINNERS = `${BASE}/winners`;
 let isWin = false;
 
 export async function getCars(page: number, limit: number): GetCarsResult {
@@ -153,12 +154,95 @@ export async function carDriveMode(
 }
 // export const controller = new AbortController();
 
+export async function deleteWinner(id: number): Promise<void | Error> {
+  try {
+    const result = await fetch(`${WINNERS}/${id}`, {
+      method: 'DELETE',
+    });
+    console.log(result);
+    if (result.status === HTTPStatusCode._OK) return;
+    if (result.status === HTTPStatusCode._NOT_FOUND) return;
+  } catch (e) {
+    return e as Error;
+  }
+}
+
+async function updateWinner(id: number, car: UpdateWin): Promise<void | Error> {
+  try {
+    const result = await fetch(`${WINNERS}/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(car),
+    });
+    if (result.status === HTTPStatusCode._OK) return;
+    if (result.status === HTTPStatusCode._NOT_FOUND) return;
+  } catch (e) {
+    return e as Error;
+  }
+}
+
+async function createWinner(winner: Win): Promise<void | Error> {
+  try {
+    const result = await fetch(`${WINNERS}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(winner),
+    });
+    console.log(JSON.stringify(winner));
+
+    if (result.status === HTTPStatusCode._CREATED) return;
+    if (result.status === HTTPStatusCode._ENGINE_BROKE) {
+      const winnerUpdate = (await getWinner(winner.id)) as Win;
+      console.log(winner);
+      console.log(winnerUpdate);
+      winnerUpdate.wins += 1;
+      if (winner.time < winnerUpdate.time) winnerUpdate.time = winner.time;
+      console.log(winnerUpdate);
+      const updating: UpdateWin = {
+        wins: winnerUpdate.wins,
+        time: winnerUpdate.time,
+      };
+      await updateWinner(winnerUpdate.id, updating);
+    }
+  } catch (e) {
+    return e as Error;
+  }
+}
+
+export async function getWinner(id: number): Promise<Win | null | Error> {
+  try {
+    const response = await fetch(`${WINNERS}?id=${id}`);
+    if (response.status === HTTPStatusCode._OK) {
+      console.log(response);
+      const winner: Win[] = await response.json();
+
+      console.log(winner[0]);
+      return winner[0];
+    }
+
+    if (response.status === HTTPStatusCode._NOT_FOUND) {
+      console.warn(`Car not found, but added`);
+    }
+
+    return null;
+  } catch (e) {
+    return e as Error;
+  }
+}
+
+export function resetRace() {
+  isWin = false;
+}
+
 export function animateCar(
   id: number,
   time: number,
   carImage: HTMLDivElement,
   winner: Winner,
-  color: string,
   race: boolean
 ): [number, number] {
   const carStyle = getComputedStyle(carImage);
@@ -212,6 +296,12 @@ export function animateCar(
           isWin = true;
           if (isWin) {
             winnerModal(winner);
+            const winner1: Win = {
+              id: winner.id,
+              wins: 1,
+              time: +(time / 1000).toFixed(2),
+            };
+            await createWinner(winner1);
           }
         }
       }
