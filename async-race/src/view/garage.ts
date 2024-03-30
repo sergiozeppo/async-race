@@ -13,14 +13,18 @@ import {
   animateCar,
   getWinner,
   deleteWinner,
+  getWinners,
+  getWinnersCount,
 } from '../components/garageControl';
-import { Car, CarCreate, CarEngine, Winner } from '../types/types';
+import { Car, CarCreate, CarEngine, Winner, Win } from '../types/types';
 import { unexpStatus } from '../components/errorMessages';
 
 let selectedCar = 0;
 let page = 1;
+let winPage = 1;
 let isRace = false;
 const pageLimit = 7;
+const winPageLimit = 10;
 const generateCount = 100;
 const winCar: Winner = {
   name: '',
@@ -31,11 +35,15 @@ const winCar: Winner = {
 };
 
 export async function garageInit(): Promise<void> {
+  document.body.innerHTML = '';
   const carsCount = (await getCarsCount()) as number;
   const settingsDiv = createElement('div', ['settings']);
   const btnDiv = createElement('div', ['wrap-div']);
   const garageView = createElement('button', ['button'], 'To Garage');
+  garageView.addEventListener('click', garageInit);
   const winnerView = createElement('button', ['button'], 'To Winners');
+  winnerView.addEventListener('click', winnersInit);
+
   btnDiv.append(garageView, winnerView);
 
   const createDiv = createElement('div', ['createCar']);
@@ -277,4 +285,104 @@ export async function garageInit(): Promise<void> {
   window.addEventListener('DOMContentLoaded', async () => {
     drawGarage();
   });
+}
+
+export async function winnersInit(): Promise<void> {
+  document.body.innerHTML = '';
+  const winsCount = (await getWinnersCount()) as number;
+  const settingsDiv = createElement('div', ['settings']);
+  const btnDiv = createElement('div', ['wrap-div']);
+  const garageView = createElement('button', ['button'], 'To Garage');
+  garageView.addEventListener('click', garageInit);
+  const winnerView = createElement('button', ['button'], 'To Winners');
+  winnerView.addEventListener('click', winnersInit);
+
+  btnDiv.append(garageView, winnerView);
+
+  const title = createElement('h1', ['title'], `Winners (${winsCount})`);
+  const pageN = createElement('h2', ['pageN'], `Page #${winPage}`);
+  settingsDiv.append(btnDiv, title, pageN);
+  document.body.append(settingsDiv);
+  getWinners(winPage, winPageLimit);
+
+  async function drawWinners(): Promise<void> {
+    const wins = (await getWinners(winPage, winPageLimit)) as Win[];
+    const winsCount = (await getWinnersCount()) as number;
+    title.textContent = `Winners (${winsCount})`;
+    drawWins(wins);
+  }
+  drawWinners();
+
+  ` <table border="1">
+  <tr>
+    <th>Number</th>
+    <th>Car</th>
+    <th>Name</th>
+    <th>Wins</th>
+    <th>Best time (seconds)</th>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td><img src="path/to/tesla-image" alt="Tesla"></td>
+    <td>Tesla</td>
+    <td>1</td>
+    <td>10</td>
+  </tr>
+  <!-- Добавьте больше строк по мере необходимости -->
+</table>
+`;
+
+  const listWinners = document.createElement('table');
+  async function drawWins(wins: Win[]): Promise<void> {
+    if (listWinners.innerHTML !== '') listWinners.innerHTML = '';
+
+    listWinners.classList.add('list-winners');
+    const tr1 = document.createElement('tr');
+    const th1 = createElement('th', ['th'], 'Number');
+    const th2 = createElement('th', ['th'], 'Car');
+    const th3 = createElement('th', ['th'], 'Name');
+    const th4 = createElement('th', ['th'], 'Wins');
+    const th5 = createElement('th', ['th'], 'Best time (seconds)');
+    tr1.append(th1, th2, th3, th4, th5);
+    listWinners.append(tr1);
+
+    wins.forEach(async (win: Win, id: number) => {
+      const tr = document.createElement('tr');
+      const th1 = createElement('th', ['cell'], `${id + 1}`);
+      const th2 = createElement('th', ['cell']);
+      const car = await getCar(win.id);
+      th2.innerHTML = carImage(car.color);
+      const th3 = createElement('th', ['cell'], `${car.name}`);
+      const th4 = createElement('th', ['cell'], `${win.wins}`);
+      const th5 = createElement('th', ['cell'], `${win.time}`);
+      tr.append(th1, th2, th3, th4, th5);
+      listWinners.append(tr);
+      // const wrapDiv1 = createElement('div', ['wrap-div']);
+      // const selectBtn = createElement('button', ['button', 'button-select'], 'SELECT');
+      // const removeBtn = createElement('button', ['button', 'button-remove'], 'REMOVE');
+      // selectBtn.id = `${win.id}`;
+      // removeBtn.id = `${win.id}`;
+      // const h3 = createElement('h3', ['list-item'], win.name);
+      // wrapDiv1.append(selectBtn, removeBtn, h3);
+      // const wrapDiv2 = createElement('div', ['wrap-div', 'race-track']);
+      // const aBtn = createElement('button', ['button', 'neon'], 'A');
+      // aBtn.id = `${win.id}`;
+      // const bBtn = createElement('button', ['button', 'neon'], 'B');
+      // bBtn.id = `${win.id}`;
+      // const carSVG = document.createElement('div');
+      // // const svg = carSVG.querySelector('svg') as SVGElement;
+      // const flagSVG = document.createElement('div');
+
+      // wrapDiv2.append(aBtn, bBtn, carSVG, flagSVG);
+      // carSVG.innerHTML = carImage(win.color);
+      // carSVG.classList.add(`svg-${win.id}`);
+      // flagSVG.innerHTML = flagImage();
+      // flagSVG.classList.add('flag');
+      // CarEl.append(wrapDiv1, wrapDiv2);
+      // listWinners.append(CarEl);
+    });
+    document.body.append(listWinners);
+    // const carsCount = (await getCarsCount()) as number;
+    // checkPagination(carsCount, page, pageLimit);
+  }
 }

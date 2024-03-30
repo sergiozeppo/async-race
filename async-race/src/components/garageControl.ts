@@ -1,6 +1,15 @@
 import '../style.css';
 import { HTTPStatusCode } from '../types/httpstatuscode';
-import { GetCarsResult, Car, CarCreate, CarEngine, Winner, Win, UpdateWin } from '../types/types';
+import {
+  GetCarsResult,
+  Car,
+  CarCreate,
+  CarEngine,
+  Winner,
+  Win,
+  UpdateWin,
+  GetWinsResult,
+} from '../types/types';
 import { brands } from './brands';
 import { models } from './models';
 import { getRandomColor, winnerModal } from './functions';
@@ -229,6 +238,27 @@ export async function getWinner(id: number): Promise<Win | null | Error> {
     }
 
     return null;
+  } catch (e) {
+    return e as Error;
+  }
+}
+
+export async function getWinners(page: number, limit: number): GetWinsResult {
+  try {
+    const response = await fetch(`${WINNERS}?_limit=${limit}&_page=${page}`);
+    const wins: Win[] = await response.json();
+    return wins;
+  } catch (e) {
+    return Error;
+  }
+}
+
+export async function getWinnersCount(): Promise<number | Error> {
+  try {
+    const response = await fetch(`${WINNERS}`);
+    const wins: Win[] = await response.json();
+    const winsCount = wins.length;
+    return winsCount;
   } catch (e) {
     return e as Error;
   }
