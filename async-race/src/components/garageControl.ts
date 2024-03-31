@@ -51,7 +51,7 @@ export async function getCar(id: number): Promise<Car> {
 
 export async function createCar(car: CarCreate): Promise<void | Error> {
   try {
-    const result = await fetch(`${GARAGE}`, {
+    await fetch(`${GARAGE}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ export async function createCar(car: CarCreate): Promise<void | Error> {
     });
     console.log(JSON.stringify(car));
 
-    if (result.status === HTTPStatusCode._CREATED) return;
+    // if (result.status === HTTPStatusCode._CREATED) return;
   } catch (e) {
     return e as Error;
   }
@@ -72,8 +72,8 @@ export async function deleteCar(id: number): Promise<void | Error> {
       method: 'DELETE',
     });
     console.log(result);
-    if (result.status === HTTPStatusCode._OK) return;
-    if (result.status === HTTPStatusCode._NOT_FOUND) return;
+    // if (result.status === HTTPStatusCode._OK) return;
+    // if (result.status === HTTPStatusCode._NOT_FOUND) return;
   } catch (e) {
     return e as Error;
   }
@@ -81,15 +81,15 @@ export async function deleteCar(id: number): Promise<void | Error> {
 
 export async function updateCar(id: number, car: CarCreate): Promise<void | Error> {
   try {
-    const result = await fetch(`${GARAGE}/${id}`, {
+    await fetch(`${GARAGE}/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(car),
     });
-    if (result.status === HTTPStatusCode._OK) return;
-    if (result.status === HTTPStatusCode._NOT_FOUND) return;
+    // if (result.status === HTTPStatusCode._OK) return;
+    // if (result.status === HTTPStatusCode._NOT_FOUND) return;
   } catch (e) {
     return e as Error;
   }
@@ -169,8 +169,8 @@ export async function deleteWinner(id: number): Promise<void | Error> {
       method: 'DELETE',
     });
     console.log(result);
-    if (result.status === HTTPStatusCode._OK) return;
-    if (result.status === HTTPStatusCode._NOT_FOUND) return;
+    // if (result.status === HTTPStatusCode._OK) return;
+    // if (result.status === HTTPStatusCode._NOT_FOUND) return;
   } catch (e) {
     return e as Error;
   }
@@ -178,15 +178,15 @@ export async function deleteWinner(id: number): Promise<void | Error> {
 
 async function updateWinner(id: number, car: UpdateWin): Promise<void | Error> {
   try {
-    const result = await fetch(`${WINNERS}/${id}`, {
+    await fetch(`${WINNERS}/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(car),
     });
-    if (result.status === HTTPStatusCode._OK) return;
-    if (result.status === HTTPStatusCode._NOT_FOUND) return;
+    // if (result.status === HTTPStatusCode._OK) return ;
+    // if (result.status === HTTPStatusCode._NOT_FOUND) return;
   } catch (e) {
     return e as Error;
   }
@@ -203,7 +203,7 @@ async function createWinner(winner: Win): Promise<void | Error> {
     });
     console.log(JSON.stringify(winner));
 
-    if (result.status === HTTPStatusCode._CREATED) return;
+    // if (result.status === HTTPStatusCode._CREATED) return;
     if (result.status === HTTPStatusCode._ENGINE_BROKE) {
       const winnerUpdate = (await getWinner(winner.id)) as Win;
       console.log(winner);
@@ -271,7 +271,7 @@ export async function getWinnersCount(): Promise<number | Error> {
   }
 }
 
-export function resetRace() {
+export function resetRace(): void {
   isWin = false;
 }
 
@@ -284,15 +284,17 @@ export function animateCar(
 ): [number, number] {
   const carStyle = getComputedStyle(carImage);
   const parentStyle = getComputedStyle(carImage.parentElement as HTMLDivElement);
-  const carWidth = parseInt(carStyle.width);
-  const parentWidth = parseInt(parentStyle.width);
+  const decimal = 10;
+  const carWidth = parseInt(carStyle.width, decimal);
+  const parentWidth = parseInt(parentStyle.width, decimal);
   // const signal = controller.signal;
   const svg = carImage.querySelector('svg') as SVGElement;
+  const dblSize = 2;
 
   const animation = svg.animate(
     [
       { transform: 'translateX(0px)' },
-      { transform: `translateX(calc(${parentWidth}px - ${carWidth * 2}px))` },
+      { transform: `translateX(calc(${parentWidth}px - ${carWidth * dblSize}px))` },
     ],
     {
       duration: time,
@@ -302,9 +304,9 @@ export function animateCar(
   animation.id = `${id}`;
   animation.play();
   animation.onfinish = (): void => {
-    svg.style.transform = `translateX(calc(${parentWidth}px - ${carWidth * 2}px))`;
+    svg.style.transform = `translateX(calc(${parentWidth}px - ${carWidth * dblSize}px))`;
   };
-  (async () => {
+  (async (): Promise<void> => {
     try {
       const response = await fetch(`${ENGINE}?id=${id}&status=drive`, {
         method: 'PATCH',
@@ -332,12 +334,14 @@ export function animateCar(
           race = false;
           isWin = true;
           if (isWin) {
+            const seconds = 1000;
+            const point = 2;
             toggleButtons(false);
             winnerModal(winner);
             const winner1: Win = {
               id: winner.id,
               wins: 1,
-              time: +(time / 1000).toFixed(2),
+              time: +(time / seconds).toFixed(point),
             };
             await createWinner(winner1);
           }
@@ -358,7 +362,7 @@ export function resetCar(carImage: HTMLDivElement): void {
   svg.style.transform = 'translateX(0px)';
 }
 
-export function toggleButtons(onoff: boolean) {
+export function toggleButtons(onoff: boolean): void {
   const buttons = document.querySelectorAll('button');
   if (buttons) {
     buttons.forEach((button) => {

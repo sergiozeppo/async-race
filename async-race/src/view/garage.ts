@@ -17,7 +17,7 @@ import {
   getWinnersCount,
   toggleButtons,
 } from '../components/garageControl';
-import { Car, CarCreate, CarEngine, Winner, Win } from '../types/types';
+import { Car, CarCreate, CarEngine, Winner, Win, Sort } from '../types/types';
 import { unexpStatus } from '../components/errorMessages';
 
 let selectedCar = 0;
@@ -136,10 +136,11 @@ export async function garageInit(): Promise<void> {
       // const carItem = getCar(car.id);
       promises.push(startCar);
     });
+    const sec = 5000;
     Promise.race(promises).finally(() =>
       setTimeout(() => {
         toggleButtons(false);
-      }, 5000)
+      }, sec)
     );
   });
 
@@ -189,8 +190,8 @@ export async function garageInit(): Promise<void> {
 
   async function drawGarage(): Promise<void> {
     const cars = (await getCars(page, pageLimit)) as Car[];
-    const carsCount = (await getCarsCount()) as number;
-    title.textContent = `Garage (${carsCount})`;
+    const carsCount4 = (await getCarsCount()) as number;
+    title.textContent = `Garage (${carsCount4})`;
     drawCars(cars);
   }
   drawGarage();
@@ -290,8 +291,8 @@ export async function garageInit(): Promise<void> {
       listCars.append(CarEl);
     });
     document.body.append(listCars);
-    const carsCount = (await getCarsCount()) as number;
-    checkPagination(carsCount, page, pageLimit);
+    const carsCount5 = (await getCarsCount()) as number;
+    checkPagination(carsCount5, page, pageLimit);
   }
 
   async function checkPagination(total: number, currPage: number, limit: number): Promise<void> {
@@ -315,8 +316,8 @@ export async function garageInit(): Promise<void> {
         page -= 1;
         drawGarage();
         pageN.textContent = `Page #${page}`;
-        const carsCount = (await getCarsCount()) as number;
-        checkPagination(carsCount, page, pageLimit);
+        const carsCount1 = (await getCarsCount()) as number;
+        checkPagination(carsCount1, page, pageLimit);
       });
     }
 
@@ -328,8 +329,8 @@ export async function garageInit(): Promise<void> {
         page += 1;
         drawGarage();
         pageN.textContent = `Page #${page}`;
-        const carsCount = (await getCarsCount()) as number;
-        checkPagination(carsCount, page, pageLimit);
+        const carsCount2 = (await getCarsCount()) as number;
+        checkPagination(carsCount2, page, pageLimit);
       });
     }
   }
@@ -371,42 +372,41 @@ export async function winnersInit(): Promise<void> {
 
   async function drawWinners(): Promise<void> {
     const wins = (await getWinners(winPage, winPageLimit)) as Win[];
-    const winsCount = (await getWinnersCount()) as number;
-    title.textContent = `Winners (${winsCount})`;
+    const winsCount1 = (await getWinnersCount()) as number;
+    title.textContent = `Winners (${winsCount1})`;
     drawWins(wins);
   }
   drawWinners();
 
-  async function drawParams(param: 'id' | 'wins' | 'time') {
+  async function drawParams(param: 'id' | 'wins' | 'time'): Promise<void> {
     const wins = (await getWinners(winPage, winPageLimit, param, ascdesc)) as Win[];
     if (ascdesc === 'ASC') ascdesc = 'DESC';
     else ascdesc = 'ASC';
-    const winsCount = (await getWinnersCount()) as number;
-    title.textContent = `Winners (${winsCount})`;
+    const winsCount2 = (await getWinnersCount()) as number;
+    title.textContent = `Winners (${winsCount2})`;
     drawWins(wins);
   }
 
   const listWinners = document.createElement('table');
   async function drawWins(wins: Win[]): Promise<void> {
     if (listWinners.innerHTML !== '') listWinners.innerHTML = '';
-
     listWinners.classList.add('list-winners');
     const tr1 = document.createElement('tr');
     const th1 = createElement('th', ['th', 'heading'], 'Number');
     th1.addEventListener('click', async () => {
-      const sortID: 'id' = 'id';
+      const sortID: Sort = 'id';
       drawParams(sortID);
     });
     const th2 = createElement('th', ['th'], 'Car');
     const th3 = createElement('th', ['th'], 'Name');
     const th4 = createElement('th', ['th', 'heading'], 'Wins');
     th4.addEventListener('click', async () => {
-      const sortID: 'wins' = 'wins';
+      const sortID: Sort = 'wins';
       drawParams(sortID);
     });
     const th5 = createElement('th', ['th', 'heading'], 'Best time (seconds)');
     th5.addEventListener('click', async () => {
-      const time: 'time' = 'time';
+      const time: Sort = 'time';
       drawParams(time);
     });
     tr1.append(th1, th2, th3, th4, th5);
@@ -414,19 +414,19 @@ export async function winnersInit(): Promise<void> {
 
     wins.forEach(async (win: Win, id: number) => {
       const tr = document.createElement('tr');
-      const th1 = createElement('th', ['cell'], `${id + 1}`);
-      const th2 = createElement('th', ['cell']);
+      const td1 = createElement('td', ['cell'], `${id + 1}`);
+      const td2 = createElement('td', ['cell']);
       const car = await getCar(win.id);
-      th2.innerHTML = carImage(car.color);
-      const th3 = createElement('th', ['cell'], `${car.name}`);
-      const th4 = createElement('th', ['cell'], `${win.wins}`);
-      const th5 = createElement('th', ['cell'], `${win.time}`);
-      tr.append(th1, th2, th3, th4, th5);
+      td2.innerHTML = carImage(car.color);
+      const td3 = createElement('td', ['cell'], `${car.name}`);
+      const td4 = createElement('td', ['cell'], `${win.wins}`);
+      const td5 = createElement('td', ['cell'], `${win.time}`);
+      tr.append(td1, td2, td3, td4, td5);
       listWinners.append(tr);
     });
     document.body.append(listWinners);
-    const winsCount = (await getWinnersCount()) as number;
-    checkPagination(winsCount, winPage, winPageLimit);
+    const winsCount3 = (await getWinnersCount()) as number;
+    checkPagination(winsCount3, winPage, winPageLimit);
   }
   // view = 'winners';
   // toggleView(view);
@@ -452,8 +452,8 @@ export async function winnersInit(): Promise<void> {
         winPage -= 1;
         drawWinners();
         pageN.textContent = `Page #${winPage}`;
-        const winsCount = (await getWinnersCount()) as number;
-        checkPagination(winsCount, winPage, winPageLimit);
+        const winsCount4 = (await getWinnersCount()) as number;
+        checkPagination(winsCount4, winPage, winPageLimit);
       });
     }
 
@@ -465,8 +465,8 @@ export async function winnersInit(): Promise<void> {
         winPage += 1;
         drawWinners();
         pageN.textContent = `Page #${winPage}`;
-        const winsCount = (await getWinnersCount()) as number;
-        checkPagination(winsCount, winPage, winPageLimit);
+        const winsCount5 = (await getWinnersCount()) as number;
+        checkPagination(winsCount5, winPage, winPageLimit);
       });
     }
   }
