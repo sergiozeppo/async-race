@@ -34,15 +34,29 @@ const winCar: Winner = {
   count: 0,
 };
 
+const saveInfoCar: {
+  idCar: number;
+  name: string;
+  color: string;
+  updName: string;
+  updColor: string;
+} = {
+  idCar: 0,
+  name: '',
+  color: '',
+  updName: '',
+  updColor: '',
+};
+
 export async function garageInit(): Promise<void> {
   document.body.innerHTML = '';
+  if (saveInfoCar.idCar !== 0) selectedCar = saveInfoCar.idCar;
   const carsCount = (await getCarsCount()) as number;
   const settingsDiv = createElement('div', ['settings']);
   const btnDiv = createElement('div', ['wrap-div']);
   const garageView = createElement('button', ['button'], 'To Garage');
   garageView.addEventListener('click', garageInit);
   const winnerView = createElement('button', ['button'], 'To Winners');
-  winnerView.addEventListener('click', winnersInit);
 
   btnDiv.append(garageView, winnerView);
 
@@ -50,8 +64,15 @@ export async function garageInit(): Promise<void> {
   const carName = createElement('input', ['carName']) as HTMLInputElement;
   carName.type = 'text';
   carName.placeholder = 'Car Name';
+  if (saveInfoCar.name !== '') {
+    carName.value = saveInfoCar.name;
+    carName.placeholder = saveInfoCar.name;
+  }
   const carColor = createElement('input', ['carColor']) as HTMLInputElement;
   carColor.type = 'color';
+  if (saveInfoCar.color !== '') {
+    carColor.value = saveInfoCar.color;
+  }
   const createCarBtn = createElement('button', ['button'], 'Create');
   createDiv.append(carName, carColor, createCarBtn);
 
@@ -59,10 +80,27 @@ export async function garageInit(): Promise<void> {
   const newCarName = createElement('input', ['newCarName']) as HTMLInputElement;
   newCarName.type = 'text';
   newCarName.placeholder = 'Car Name';
+  if (saveInfoCar.updName !== '') {
+    newCarName.value = saveInfoCar.updName;
+    newCarName.placeholder = saveInfoCar.updName;
+  }
   const newCarColor = createElement('input', ['newCarColor']) as HTMLInputElement;
   newCarColor.type = 'color';
+  if (saveInfoCar.updColor !== '') {
+    newCarColor.value = saveInfoCar.updColor;
+  }
   const updateCarBtn = createElement('button', ['button'], 'Update');
   updateDiv.append(newCarName, newCarColor, updateCarBtn);
+
+  winnerView.addEventListener('click', () => {
+    saveInfoCar.idCar = selectedCar;
+    saveInfoCar.name = carName?.value || '';
+    saveInfoCar.color = carColor?.value || '';
+    saveInfoCar.updName = newCarName?.value || '';
+    saveInfoCar.updColor = newCarColor?.value || '';
+
+    winnersInit();
+  });
 
   const raceDiv = createElement('div', ['wrap-div']);
   const raceBtn = createElement('button', ['button'], 'Race');
@@ -76,16 +114,7 @@ export async function garageInit(): Promise<void> {
       // const carItem = getCar(car.id);
       promises.push(startCar);
     });
-    Promise.race(promises).then(() => {
-      isRace = false;
-      console.log(winCar);
-    });
-    // .then((result) => {
-    //   if (result) {
-    //     const [car, error] = result;
-    //     if (!error && car) console.log((Math.round(car.distance / car.velocity) / 1000).toFixed(2));
-    //   }
-    // });
+    Promise.race(promises);
   });
 
   const resetBtn = createElement('button', ['button'], 'Reset');
@@ -190,6 +219,8 @@ export async function garageInit(): Promise<void> {
         newCarName.placeholder = `${updatingCar.name}`;
         newCarName.value = `${updatingCar.name}`;
         newCarColor.value = `${updatingCar.color}`;
+        saveInfoCar.updName = updatingCar.name;
+        saveInfoCar.updColor = updatingCar.color;
       });
       removeBtn.id = `${car.id}`;
       removeBtn.addEventListener('click', async () => {
@@ -312,25 +343,6 @@ export async function winnersInit(): Promise<void> {
     drawWins(wins);
   }
   drawWinners();
-
-  ` <table border="1">
-  <tr>
-    <th>Number</th>
-    <th>Car</th>
-    <th>Name</th>
-    <th>Wins</th>
-    <th>Best time (seconds)</th>
-  </tr>
-  <tr>
-    <td>1</td>
-    <td><img src="path/to/tesla-image" alt="Tesla"></td>
-    <td>Tesla</td>
-    <td>1</td>
-    <td>10</td>
-  </tr>
-  <!-- Добавьте больше строк по мере необходимости -->
-</table>
-`;
 
   const listWinners = document.createElement('table');
   async function drawWins(wins: Win[]): Promise<void> {
