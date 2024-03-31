@@ -325,6 +325,7 @@ export function animateCar(
           race = false;
           isWin = true;
           if (isWin) {
+            toggleButtons(false);
             winnerModal(winner);
             const winner1: Win = {
               id: winner.id,
@@ -348,4 +349,14 @@ export function animateCar(
 export function resetCar(carImage: HTMLDivElement): void {
   const svg = carImage.querySelector('svg') as SVGElement;
   svg.style.transform = 'translateX(0px)';
+}
+
+export function toggleButtons(onoff: boolean) {
+  const buttons = document.querySelectorAll('button');
+  if (buttons) {
+    buttons.forEach((button) => {
+      if (onoff) button.disabled = true;
+      else button.disabled = false;
+    });
+  }
 }

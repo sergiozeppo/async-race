@@ -15,6 +15,7 @@ import {
   deleteWinner,
   getWinners,
   getWinnersCount,
+  toggleButtons,
 } from '../components/garageControl';
 import { Car, CarCreate, CarEngine, Winner, Win } from '../types/types';
 import { unexpStatus } from '../components/errorMessages';
@@ -125,6 +126,7 @@ export async function garageInit(): Promise<void> {
   const raceBtn = createElement('button', ['button'], 'Race');
   raceBtn.addEventListener('click', async () => {
     resetRace();
+    toggleButtons(true);
     const cars1 = (await getCars(page, pageLimit)) as Car[];
     const promises: Promise<[CarEngine, null] | [null, Error]>[] = [];
     cars1.forEach((car) => {
@@ -133,7 +135,11 @@ export async function garageInit(): Promise<void> {
       // const carItem = getCar(car.id);
       promises.push(startCar);
     });
-    Promise.race(promises);
+    Promise.race(promises).finally(() =>
+      setTimeout(() => {
+        toggleButtons(false);
+      }, 5000)
+    );
   });
 
   const resetBtn = createElement('button', ['button'], 'Reset');
@@ -251,10 +257,11 @@ export async function garageInit(): Promise<void> {
       const h3 = createElement('h3', ['list-item'], car.name);
       wrapDiv1.append(selectBtn, removeBtn, h3);
       const wrapDiv2 = createElement('div', ['wrap-div', 'race-track']);
-      const aBtn = createElement('button', ['button', 'neon'], 'A');
+      const aBtn = createElement('button', ['button', 'neon'], 'A') as HTMLButtonElement;
       aBtn.id = `${car.id}`;
-      const bBtn = createElement('button', ['button', 'neon'], 'B');
+      const bBtn = createElement('button', ['button', 'neon'], 'B') as HTMLButtonElement;
       bBtn.id = `${car.id}`;
+      bBtn.disabled = true;
       const carSVG = document.createElement('div');
       // const svg = carSVG.querySelector('svg') as SVGElement;
       const flagSVG = document.createElement('div');
@@ -266,13 +273,17 @@ export async function garageInit(): Promise<void> {
       flagSVG.classList.add('flag');
       aBtn.addEventListener('click', async () => {
         await startEngine(car.id, winCar, isRace);
+        aBtn.disabled = true;
+        bBtn.disabled = false;
       });
       bBtn.addEventListener('click', async () => {
+        aBtn.disabled = false;
         document.getAnimations().forEach((anime) => {
           if (anime.id === bBtn.id) anime.cancel();
         });
         resetCar(carSVG);
         stopEngine(car.id);
+        bBtn.disabled = true;
       });
       CarEl.append(wrapDiv1, wrapDiv2);
       listCars.append(CarEl);

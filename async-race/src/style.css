@@ -169,3 +169,8 @@ button {
 .hidden {
   display: none;
 }
+
+button[disabled] {
+  color: #777;
+  pointer-events: none;
+}
