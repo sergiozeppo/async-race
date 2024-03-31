@@ -174,3 +174,7 @@ button[disabled] {
   color: #777;
   pointer-events: none;
 }
+
+.heading:hover {
+  cursor: pointer;
+}

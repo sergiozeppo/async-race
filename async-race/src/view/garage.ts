@@ -392,19 +392,19 @@ export async function winnersInit(): Promise<void> {
 
     listWinners.classList.add('list-winners');
     const tr1 = document.createElement('tr');
-    const th1 = createElement('th', ['th'], 'Number');
+    const th1 = createElement('th', ['th', 'heading'], 'Number');
     th1.addEventListener('click', async () => {
       const sortID: 'id' = 'id';
       drawParams(sortID);
     });
     const th2 = createElement('th', ['th'], 'Car');
     const th3 = createElement('th', ['th'], 'Name');
-    const th4 = createElement('th', ['th'], 'Wins');
+    const th4 = createElement('th', ['th', 'heading'], 'Wins');
     th4.addEventListener('click', async () => {
       const sortID: 'wins' = 'wins';
       drawParams(sortID);
     });
-    const th5 = createElement('th', ['th'], 'Best time (seconds)');
+    const th5 = createElement('th', ['th', 'heading'], 'Best time (seconds)');
     th5.addEventListener('click', async () => {
       const time: 'time' = 'time';
       drawParams(time);
