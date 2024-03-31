@@ -243,9 +243,16 @@ export async function getWinner(id: number): Promise<Win | null | Error> {
   }
 }
 
-export async function getWinners(page: number, limit: number): GetWinsResult {
+export async function getWinners(
+  page: number,
+  limit: number,
+  sort?: 'id' | 'wins' | 'time',
+  order?: 'ASC' | 'DESC'
+): GetWinsResult {
   try {
-    const response = await fetch(`${WINNERS}?_limit=${limit}&_page=${page}`);
+    const response = await fetch(
+      `${WINNERS}?_limit=${limit}&_page=${page}${sort ? `&_sort=${sort}` : ''}${order ? `&_order=${order}` : ''}`
+    );
     const wins: Win[] = await response.json();
     return wins;
   } catch (e) {
