@@ -165,3 +165,7 @@ button {
   color: #000;
   margin-bottom: 3rem;
 }
+
+.hidden {
+  display: none;
+}

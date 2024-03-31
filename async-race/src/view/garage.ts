@@ -48,11 +48,30 @@ const saveInfoCar: {
   updColor: '',
 };
 
+// let view: 'garage' | 'winners' = 'garage';
+// function toggleView(view: 'garage' | 'winners'): void {
+//   if (view === 'garage') {
+//     const winners = document.querySelector('.list-winners');
+//     if (winners) winners.classList.add('hidden');
+//     const settingsW = document.querySelector('.winnersSet');
+//     if (settingsW) settingsW.classList.add('hidden');
+//     const listCars = document.querySelector('.list-cars');
+//     if (listCars) listCars.classList?.remove('hidden');
+//   } else {
+//     const winners = document.querySelector('.list-winners');
+//     if (winners) winners.classList?.remove('hidden');
+//     const settingsW = document.querySelector('.winnersSet');
+//     if (settingsW) settingsW.classList?.remove('hidden');
+//     const listCars = document.querySelector('.list-cars');
+//     if (listCars) listCars.classList.add('hidden');
+//   }
+// }
+
 export async function garageInit(): Promise<void> {
   document.body.innerHTML = '';
   if (saveInfoCar.idCar !== 0) selectedCar = saveInfoCar.idCar;
   const carsCount = (await getCarsCount()) as number;
-  const settingsDiv = createElement('div', ['settings']);
+  const settingsDiv = createElement('div', ['settings', 'garageSet']);
   const btnDiv = createElement('div', ['wrap-div']);
   const garageView = createElement('button', ['button'], 'To Garage');
   garageView.addEventListener('click', garageInit);
@@ -316,12 +335,14 @@ export async function garageInit(): Promise<void> {
   window.addEventListener('DOMContentLoaded', async () => {
     drawGarage();
   });
+  // view = 'garage';
+  // toggleView(view);
 }
 
 export async function winnersInit(): Promise<void> {
   document.body.innerHTML = '';
   const winsCount = (await getWinnersCount()) as number;
-  const settingsDiv = createElement('div', ['settings']);
+  const settingsDiv = createElement('div', ['settings', 'winnersSet']);
   const btnDiv = createElement('div', ['wrap-div']);
   const garageView = createElement('button', ['button'], 'To Garage');
   garageView.addEventListener('click', garageInit);
@@ -369,32 +390,51 @@ export async function winnersInit(): Promise<void> {
       const th5 = createElement('th', ['cell'], `${win.time}`);
       tr.append(th1, th2, th3, th4, th5);
       listWinners.append(tr);
-      // const wrapDiv1 = createElement('div', ['wrap-div']);
-      // const selectBtn = createElement('button', ['button', 'button-select'], 'SELECT');
-      // const removeBtn = createElement('button', ['button', 'button-remove'], 'REMOVE');
-      // selectBtn.id = `${win.id}`;
-      // removeBtn.id = `${win.id}`;
-      // const h3 = createElement('h3', ['list-item'], win.name);
-      // wrapDiv1.append(selectBtn, removeBtn, h3);
-      // const wrapDiv2 = createElement('div', ['wrap-div', 'race-track']);
-      // const aBtn = createElement('button', ['button', 'neon'], 'A');
-      // aBtn.id = `${win.id}`;
-      // const bBtn = createElement('button', ['button', 'neon'], 'B');
-      // bBtn.id = `${win.id}`;
-      // const carSVG = document.createElement('div');
-      // // const svg = carSVG.querySelector('svg') as SVGElement;
-      // const flagSVG = document.createElement('div');
-
-      // wrapDiv2.append(aBtn, bBtn, carSVG, flagSVG);
-      // carSVG.innerHTML = carImage(win.color);
-      // carSVG.classList.add(`svg-${win.id}`);
-      // flagSVG.innerHTML = flagImage();
-      // flagSVG.classList.add('flag');
-      // CarEl.append(wrapDiv1, wrapDiv2);
-      // listWinners.append(CarEl);
     });
     document.body.append(listWinners);
-    // const carsCount = (await getCarsCount()) as number;
-    // checkPagination(carsCount, page, pageLimit);
+    const winsCount = (await getWinnersCount()) as number;
+    checkPagination(winsCount, winPage, winPageLimit);
+  }
+  // view = 'winners';
+  // toggleView(view);
+
+  async function checkPagination(total: number, currPage: number, limit: number): Promise<void> {
+    if (document.querySelector('.wrap-div-control')) {
+      const delItem = document.querySelector('.wrap-div-control');
+      delItem?.remove();
+    }
+    const wrapDiv2 = createElement('div', ['wrap-div-control']) as HTMLDivElement;
+    const prevBtn = createElement('button', ['button'], 'PREV') as HTMLButtonElement;
+    const nextBtn = createElement('button', ['button'], 'NEXT') as HTMLButtonElement;
+
+    wrapDiv2.append(prevBtn, nextBtn);
+    document.body.append(wrapDiv2);
+    const isLastPage: boolean = total / (currPage * limit) <= 1;
+
+    if (currPage === 1) {
+      prevBtn.disabled = true;
+    } else {
+      prevBtn.disabled = false;
+      prevBtn.addEventListener('click', async () => {
+        winPage -= 1;
+        drawWinners();
+        pageN.textContent = `Page #${winPage}`;
+        const winsCount = (await getWinnersCount()) as number;
+        checkPagination(winsCount, winPage, winPageLimit);
+      });
+    }
+
+    if (isLastPage) {
+      nextBtn.disabled = true;
+    } else {
+      nextBtn.disabled = false;
+      nextBtn.addEventListener('click', async () => {
+        winPage += 1;
+        drawWinners();
+        pageN.textContent = `Page #${winPage}`;
+        const winsCount = (await getWinnersCount()) as number;
+        checkPagination(winsCount, winPage, winPageLimit);
+      });
+    }
   }
 }
