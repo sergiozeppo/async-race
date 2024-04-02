@@ -378,7 +378,7 @@ export async function winnersInit(): Promise<void> {
   }
 
   const listWinners = document.createElement('table');
-  async function drawWins(wins: Win[]): Promise<void> {
+  function drawWins(wins: Win[]): void {
     if (listWinners.innerHTML !== '') listWinners.innerHTML = '';
     listWinners.classList.add('list-winners');
     const tr1 = document.createElement('tr');
@@ -401,18 +401,15 @@ export async function winnersInit(): Promise<void> {
         ['cell'],
         `${(winPage - 1 > 0 ? String(winPage - 1) : '') + String(id + 1)}`
       );
+      const td1 = createElement('td', ['cell'], `${car.id}`);
       const td2 = createElement('td', ['cell']);
       td2.innerHTML = carImage(car.color);
-      const td1 = createElement('td', ['cell'], `${car.id}`);
       const td3 = createElement('td', ['cell'], `${car.name}`);
       const td4 = createElement('td', ['cell'], `${win.wins}`);
       const td5 = createElement('td', ['cell'], `${win.time}`);
       tr.append(td, td1, td2, td3, td4, td5);
       listWinners.append(tr);
     });
-    document.body.append(listWinners);
-    const winsCount3 = (await getWinnersCount()) as number;
-    checkPagination(winsCount3, winPage, winPageLimit);
 
     th1.addEventListener('click', () => {
       sortParam = 'id';
@@ -439,6 +436,9 @@ export async function winnersInit(): Promise<void> {
       th5.textContent += arrowAscDesc(ascdesc);
     }
   }
+  document.body.append(listWinners);
+  const winsCount3 = (await getWinnersCount()) as number;
+  checkPagination(winsCount3, winPage, winPageLimit);
 
   async function checkPagination(total: number, currPage: number, limit: number): Promise<void> {
     if (document.querySelector('.wrap-div-control')) {
