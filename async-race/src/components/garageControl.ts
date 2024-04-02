@@ -58,9 +58,6 @@ export async function createCar(car: CarCreate): Promise<void | Error> {
       },
       body: JSON.stringify(car),
     });
-    console.log(JSON.stringify(car));
-
-    // if (result.status === HTTPStatusCode._CREATED) return;
   } catch (e) {
     return e as Error;
   }
@@ -68,12 +65,9 @@ export async function createCar(car: CarCreate): Promise<void | Error> {
 
 export async function deleteCar(id: number): Promise<void | Error> {
   try {
-    const result = await fetch(`${GARAGE}/${id}`, {
+    await fetch(`${GARAGE}/${id}`, {
       method: 'DELETE',
     });
-    console.log(result);
-    // if (result.status === HTTPStatusCode._OK) return;
-    // if (result.status === HTTPStatusCode._NOT_FOUND) return;
   } catch (e) {
     return e as Error;
   }
@@ -88,8 +82,6 @@ export async function updateCar(id: number, car: CarCreate): Promise<void | Erro
       },
       body: JSON.stringify(car),
     });
-    // if (result.status === HTTPStatusCode._OK) return;
-    // if (result.status === HTTPStatusCode._NOT_FOUND) return;
   } catch (e) {
     return e as Error;
   }
@@ -146,9 +138,7 @@ export async function carDriveMode(
       method: 'PATCH',
     });
     if (result.status === HTTPStatusCode._OK) {
-      console.log(result);
       const data: { success: boolean } = await result.json();
-      console.log(data);
       return data;
     }
 
@@ -161,16 +151,12 @@ export async function carDriveMode(
     return e as Error;
   }
 }
-// export const controller = new AbortController();
 
 export async function deleteWinner(id: number): Promise<void | Error> {
   try {
-    const result = await fetch(`${WINNERS}/${id}`, {
+    await fetch(`${WINNERS}/${id}`, {
       method: 'DELETE',
     });
-    console.log(result);
-    // if (result.status === HTTPStatusCode._OK) return;
-    // if (result.status === HTTPStatusCode._NOT_FOUND) return;
   } catch (e) {
     return e as Error;
   }
@@ -185,8 +171,6 @@ async function updateWinner(id: number, car: UpdateWin): Promise<void | Error> {
       },
       body: JSON.stringify(car),
     });
-    // if (result.status === HTTPStatusCode._OK) return ;
-    // if (result.status === HTTPStatusCode._NOT_FOUND) return;
   } catch (e) {
     return e as Error;
   }
@@ -201,16 +185,11 @@ async function createWinner(winner: Win): Promise<void | Error> {
       },
       body: JSON.stringify(winner),
     });
-    console.log(JSON.stringify(winner));
 
-    // if (result.status === HTTPStatusCode._CREATED) return;
     if (result.status === HTTPStatusCode._ENGINE_BROKE) {
       const winnerUpdate = (await getWinner(winner.id)) as Win;
-      console.log(winner);
-      console.log(winnerUpdate);
       winnerUpdate.wins += 1;
       if (winner.time < winnerUpdate.time) winnerUpdate.time = winner.time;
-      console.log(winnerUpdate);
       const updating: UpdateWin = {
         wins: winnerUpdate.wins,
         time: winnerUpdate.time,
@@ -226,10 +205,7 @@ export async function getWinner(id: number): Promise<Win | null | Error> {
   try {
     const response = await fetch(`${WINNERS}?id=${id}`);
     if (response.status === HTTPStatusCode._OK) {
-      console.log(response);
       const winner: Win[] = await response.json();
-
-      console.log(winner[0]);
       return winner[0];
     }
 
@@ -287,7 +263,6 @@ export function animateCar(
   const decimal = 10;
   const carWidth = parseInt(carStyle.width, decimal);
   const parentWidth = parseInt(parentStyle.width, decimal);
-  // const signal = controller.signal;
   const svg = carImage.querySelector('svg') as SVGElement;
   const dblSize = 2;
 
@@ -310,19 +285,11 @@ export function animateCar(
     try {
       const response = await fetch(`${ENGINE}?id=${id}&status=drive`, {
         method: 'PATCH',
-        // signal,
       });
       if (!response.ok) {
         throw new Error('Server error');
       }
-      // if (signal.aborted) {
-      //   if (signal.reason) {
-      //     console.log(`Request aborted with reason: ${signal.reason}`);
-      //   } else {
-      //     console.log('Request aborted but no reason was given.');
-      //   }
-      // }
-      const data = await response.json();
+      await response.json();
       if (race) {
         if (!isWin) {
           const car = await getCar(id);
@@ -347,8 +314,6 @@ export function animateCar(
           }
         }
       }
-      console.log(data);
-      console.log(winner);
     } catch (error) {
       animation.pause();
       console.error('Error:', error);

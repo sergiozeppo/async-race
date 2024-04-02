@@ -100,18 +100,7 @@ export function winnerModal(winner: Winner): void {
   );
   greetCreate.innerHTML += `<br>${carImage(winner.color)}`;
   resultCreate.appendChild(greetCreate);
-  // const acceptButton = createElement('button', [], `Yes`, resultCreate);
-  // const declineButton = createElement('button', [], `No`, resultCreate);
   document.body.appendChild(modal);
-  // acceptButton.addEventListener('click', () => {
-  //   modal.classList?.remove('visible');
-  //   delete localStorage.user;
-  //   delete localStorage.audiohint;
-  //   delete localStorage.texthint;
-  //   const bodyChild = Array.from(document.body.children);
-  //   bodyChild.forEach((child) => document.body.removeChild(child));
-  //   // location.reload();
-  // });
   window.addEventListener('click', () => {
     modal.classList?.remove('visible');
     modal.remove();

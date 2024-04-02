@@ -51,25 +51,6 @@ const saveInfoCar: {
   updColor: '',
 };
 
-// let view: 'garage' | 'winners' = 'garage';
-// function toggleView(view: 'garage' | 'winners'): void {
-//   if (view === 'garage') {
-//     const winners = document.querySelector('.list-winners');
-//     if (winners) winners.classList.add('hidden');
-//     const settingsW = document.querySelector('.winnersSet');
-//     if (settingsW) settingsW.classList.add('hidden');
-//     const listCars = document.querySelector('.list-cars');
-//     if (listCars) listCars.classList?.remove('hidden');
-//   } else {
-//     const winners = document.querySelector('.list-winners');
-//     if (winners) winners.classList?.remove('hidden');
-//     const settingsW = document.querySelector('.winnersSet');
-//     if (settingsW) settingsW.classList?.remove('hidden');
-//     const listCars = document.querySelector('.list-cars');
-//     if (listCars) listCars.classList.add('hidden');
-//   }
-// }
-
 export async function garageInit(): Promise<void> {
   document.body.innerHTML = '';
   if (saveInfoCar.idCar !== 0) selectedCar = saveInfoCar.idCar;
@@ -134,7 +115,6 @@ export async function garageInit(): Promise<void> {
     cars1.forEach((car) => {
       isRace = true;
       const startCar = startEngine(car.id, winCar, isRace);
-      // const carItem = getCar(car.id);
       promises.push(startCar);
     });
     const sec = 5000;
@@ -147,14 +127,12 @@ export async function garageInit(): Promise<void> {
 
   const resetBtn = createElement('button', ['button'], 'Reset');
   resetBtn.addEventListener('click', async () => {
-    // const controller = new AbortController();
     const cars1 = (await getCars(page, pageLimit)) as Car[];
     cars1.forEach((car) => {
       const SVGDiv = document.querySelector(`.svg-${car.id}`) as HTMLDivElement;
       resetCar(SVGDiv);
       stopEngine(car.id);
       isRace = false;
-      // controller.abort();
     });
     document.getAnimations().forEach((anime) => {
       anime.cancel();
@@ -174,7 +152,6 @@ export async function garageInit(): Promise<void> {
 
   createCarBtn.addEventListener('click', async () => {
     createCar({ name: `${carName?.value}`, color: `${carColor?.value}` });
-    console.log(carName?.value, carColor?.value);
     drawGarage();
   });
 
@@ -205,7 +182,6 @@ export async function garageInit(): Promise<void> {
     const [data, error] = await toggleCarsEngine(id, 'started');
     if (error) console.log(error);
     else {
-      console.log(data);
       const time = Math.round(data.distance / data.velocity);
       const car = document.querySelector(`.svg-${id}`) as HTMLDivElement;
       animateCar(id, time, car, winner, race);
@@ -220,7 +196,6 @@ export async function garageInit(): Promise<void> {
       const [data, error] = await toggleCarsEngine(id, 'stopped');
       if (error) console.log(error);
       else {
-        console.log(data);
         return [data, null];
       }
     } catch (e) {
@@ -266,7 +241,6 @@ export async function garageInit(): Promise<void> {
       bBtn.id = `${car.id}`;
       bBtn.disabled = true;
       const carSVG = document.createElement('div');
-      // const svg = carSVG.querySelector('svg') as SVGElement;
       const flagSVG = document.createElement('div');
 
       wrapDiv2.append(aBtn, bBtn, carSVG, flagSVG);
@@ -349,8 +323,6 @@ export async function garageInit(): Promise<void> {
   window.addEventListener('DOMContentLoaded', async () => {
     drawGarage();
   });
-  // view = 'garage';
-  // toggleView(view);
 }
 
 export async function winnersInit(): Promise<void> {
@@ -455,8 +427,6 @@ export async function winnersInit(): Promise<void> {
       th5.textContent += arrowAscDesc(ascdesc);
     }
   }
-  // view = 'winners';
-  // toggleView(view);
 
   async function checkPagination(total: number, currPage: number, limit: number): Promise<void> {
     if (document.querySelector('.wrap-div-control')) {
