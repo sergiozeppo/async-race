@@ -394,6 +394,7 @@ export async function winnersInit(): Promise<void> {
     tr1.append(th, th1, th2, th3, th4, th5);
     listWinners.append(tr1);
     wins.forEach(async (win: Win, id: number) => {
+      const car = await getCar(win.id);
       const tr = document.createElement('tr');
       const td = createElement(
         'td',
@@ -401,7 +402,6 @@ export async function winnersInit(): Promise<void> {
         `${(winPage - 1 > 0 ? String(winPage - 1) : '') + String(id + 1)}`
       );
       const td2 = createElement('td', ['cell']);
-      const car = await getCar(win.id);
       td2.innerHTML = carImage(car.color);
       const td1 = createElement('td', ['cell'], `${car.id}`);
       const td3 = createElement('td', ['cell'], `${car.name}`);
