@@ -39,3 +39,4 @@ export type GetCarsResult = Promise<Car[] | ErrorConstructor>;
 export type GetWinsResult = Promise<Win[] | ErrorConstructor>;
 export type GetCarResult = Promise<Car | ErrorConstructor>;
 export type Sort = 'id' | 'wins' | 'time' | undefined;
+export type SortDirection = 'ASC' | 'DESC' | undefined;

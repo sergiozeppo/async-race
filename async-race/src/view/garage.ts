@@ -17,7 +17,7 @@ import {
   getWinnersCount,
   toggleButtons,
 } from '../components/garageControl';
-import { Car, CarCreate, CarEngine, Winner, Win, Sort } from '../types/types';
+import { Car, CarCreate, CarEngine, Winner, Win, Sort, SortDirection } from '../types/types';
 import { unexpStatus } from '../components/errorMessages';
 
 let selectedCar = 0;
@@ -25,7 +25,7 @@ let page = 1;
 let winPage = 1;
 let isRace = false;
 let sortParam: Sort = undefined;
-let ascdesc: 'ASC' | 'DESC' | undefined = undefined;
+let ascdesc: SortDirection = undefined;
 const pageLimit = 7;
 const winPageLimit = 10;
 const generateCount = 100;
@@ -387,6 +387,10 @@ export async function winnersInit(): Promise<void> {
     } else ascdesc = 'ASC';
   }
 
+  function arrowAscDesc(asc: SortDirection): string {
+    return asc === 'ASC' ? '↑' : '↓';
+  }
+
   async function drawParams(param: Sort): Promise<void> {
     const wins = (await getWinners(winPage, winPageLimit, param, ascdesc)) as Win[];
     const winsCount2 = (await getWinnersCount()) as number;
@@ -400,7 +404,7 @@ export async function winnersInit(): Promise<void> {
     listWinners.classList.add('list-winners');
     const tr1 = document.createElement('tr');
     const th = createElement('th', ['th', 'th'], 'Number');
-    const th1 = createElement('th', ['th', 'heading'], 'Car No.');
+    const th1 = createElement('th', ['th', 'heading', 'carNumber'], 'Car No.');
     th1.addEventListener('click', async () => {
       sortParam = 'id';
       toggleAscDesc();
@@ -408,13 +412,13 @@ export async function winnersInit(): Promise<void> {
     });
     const th2 = createElement('th', ['th'], 'Car');
     const th3 = createElement('th', ['th'], 'Name');
-    const th4 = createElement('th', ['th', 'heading'], 'Wins');
+    const th4 = createElement('th', ['th', 'heading', 'carWins'], 'Wins');
     th4.addEventListener('click', async () => {
       sortParam = 'wins';
       toggleAscDesc();
       drawParams(sortParam);
     });
-    const th5 = createElement('th', ['th', 'heading'], 'Best time (seconds)');
+    const th5 = createElement('th', ['th', 'heading', 'bestTime'], `Best time (seconds)`);
     th5.addEventListener('click', async () => {
       sortParam = 'time';
       toggleAscDesc();
@@ -442,6 +446,14 @@ export async function winnersInit(): Promise<void> {
     document.body.append(listWinners);
     const winsCount3 = (await getWinnersCount()) as number;
     checkPagination(winsCount3, winPage, winPageLimit);
+
+    if (sortParam === 'id') {
+      th1.textContent += arrowAscDesc(ascdesc);
+    } else if (sortParam === 'wins') {
+      th4.textContent += arrowAscDesc(ascdesc);
+    } else if (sortParam === 'time') {
+      th5.textContent += arrowAscDesc(ascdesc);
+    }
   }
   // view = 'winners';
   // toggleView(view);
