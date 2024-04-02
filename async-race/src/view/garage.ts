@@ -348,7 +348,7 @@ export async function winnersInit(): Promise<void> {
   const pageN = createElement('h2', ['pageN'], `Page #${winPage}`);
   settingsDiv.append(btnDiv, title, pageN);
   document.body.append(settingsDiv);
-  getWinners(winPage, winPageLimit);
+  getWinners(winPage, winPageLimit, sortParam, ascdesc);
 
   async function drawWinners(): Promise<void> {
     const wins = (await getWinners(winPage, winPageLimit, sortParam, ascdesc)) as Win[];

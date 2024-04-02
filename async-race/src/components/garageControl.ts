@@ -9,6 +9,8 @@ import {
   Win,
   UpdateWin,
   GetWinsResult,
+  Sort,
+  SortDirection,
 } from '../types/types';
 import { brands } from './brands';
 import { models } from './models';
@@ -222,8 +224,8 @@ export async function getWinner(id: number): Promise<Win | null | Error> {
 export async function getWinners(
   page: number,
   limit: number,
-  sort?: 'id' | 'wins' | 'time',
-  order?: 'ASC' | 'DESC'
+  sort?: Sort,
+  order?: SortDirection
 ): GetWinsResult {
   try {
     const response = await fetch(
