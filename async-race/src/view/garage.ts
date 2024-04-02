@@ -298,6 +298,13 @@ export async function garageInit(): Promise<void> {
 
     if (isLastPage) {
       nextBtn.disabled = true;
+      if (total % limit === 0 && currPage !== total / limit) {
+        page -= 1;
+        drawGarage();
+        pageN.textContent = `Page #${page}`;
+        const carsCount1 = (await getCarsCount()) as number;
+        checkPagination(carsCount1, page, pageLimit);
+      }
     } else {
       nextBtn.disabled = false;
       nextBtn.addEventListener('click', async () => {
