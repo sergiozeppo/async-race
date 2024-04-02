@@ -466,7 +466,7 @@ export async function winnersInit(): Promise<void> {
       if (total % limit === 0 && currPage !== total / limit) {
         page -= 1;
         drawWinners();
-        pageN.textContent = `Page #${page}`;
+        pageN.textContent = `Page #${winPage}`;
         const carsCount1 = (await getCarsCount()) as number;
         checkPagination(carsCount1, page, pageLimit);
       }
