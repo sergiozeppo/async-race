@@ -464,11 +464,11 @@ export async function winnersInit(): Promise<void> {
     if (isLastPage) {
       nextBtn.disabled = true;
       if (total % limit === 0 && currPage !== total / limit) {
-        page -= 1;
+        winPage -= 1;
         drawWinners();
         pageN.textContent = `Page #${winPage}`;
-        const carsCount1 = (await getCarsCount()) as number;
-        checkPagination(carsCount1, page, pageLimit);
+        const winsCount6 = (await getWinnersCount()) as number;
+        checkPagination(winsCount6, winPage, winPageLimit);
       }
     } else {
       nextBtn.disabled = false;
