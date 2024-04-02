@@ -351,7 +351,7 @@ export async function winnersInit(): Promise<void> {
   getWinners(winPage, winPageLimit, sortParam);
 
   async function drawWinners(): Promise<void> {
-    const wins = (await getWinners(winPage, winPageLimit, sortParam, ascdesc)) as Win[];
+    const wins = (await getWinners(winPage, winPageLimit, sortParam)) as Win[];
     const winsCount1 = (await getWinnersCount()) as number;
     title.textContent = `Winners (${winsCount1})`;
     drawWins(wins);
