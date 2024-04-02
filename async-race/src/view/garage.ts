@@ -24,7 +24,8 @@ let selectedCar = 0;
 let page = 1;
 let winPage = 1;
 let isRace = false;
-let ascdesc: 'ASC' | 'DESC' = 'ASC';
+let sortParam: Sort = undefined;
+let ascdesc: 'ASC' | 'DESC' | undefined = undefined;
 const pageLimit = 7;
 const winPageLimit = 10;
 const generateCount = 100;
@@ -371,17 +372,23 @@ export async function winnersInit(): Promise<void> {
   getWinners(winPage, winPageLimit);
 
   async function drawWinners(): Promise<void> {
-    const wins = (await getWinners(winPage, winPageLimit)) as Win[];
+    const wins = (await getWinners(winPage, winPageLimit, sortParam, ascdesc)) as Win[];
     const winsCount1 = (await getWinnersCount()) as number;
     title.textContent = `Winners (${winsCount1})`;
     drawWins(wins);
   }
   drawWinners();
 
-  async function drawParams(param: 'id' | 'wins' | 'time'): Promise<void> {
+  function toggleAscDesc(): void {
+    if (!ascdesc) {
+      ascdesc = 'ASC';
+    } else if (ascdesc === 'ASC') {
+      ascdesc = 'DESC';
+    } else ascdesc = 'ASC';
+  }
+
+  async function drawParams(param: Sort): Promise<void> {
     const wins = (await getWinners(winPage, winPageLimit, param, ascdesc)) as Win[];
-    if (ascdesc === 'ASC') ascdesc = 'DESC';
-    else ascdesc = 'ASC';
     const winsCount2 = (await getWinnersCount()) as number;
     title.textContent = `Winners (${winsCount2})`;
     drawWins(wins);
@@ -392,36 +399,44 @@ export async function winnersInit(): Promise<void> {
     if (listWinners.innerHTML !== '') listWinners.innerHTML = '';
     listWinners.classList.add('list-winners');
     const tr1 = document.createElement('tr');
-    const th1 = createElement('th', ['th', 'heading'], 'Number');
+    const th = createElement('th', ['th', 'th'], 'Number');
+    const th1 = createElement('th', ['th', 'heading'], 'Car No.');
     th1.addEventListener('click', async () => {
-      const sortID: Sort = 'id';
-      drawParams(sortID);
+      sortParam = 'id';
+      toggleAscDesc();
+      drawParams(sortParam);
     });
     const th2 = createElement('th', ['th'], 'Car');
     const th3 = createElement('th', ['th'], 'Name');
     const th4 = createElement('th', ['th', 'heading'], 'Wins');
     th4.addEventListener('click', async () => {
-      const sortID: Sort = 'wins';
-      drawParams(sortID);
+      sortParam = 'wins';
+      toggleAscDesc();
+      drawParams(sortParam);
     });
     const th5 = createElement('th', ['th', 'heading'], 'Best time (seconds)');
     th5.addEventListener('click', async () => {
-      const time: Sort = 'time';
-      drawParams(time);
+      sortParam = 'time';
+      toggleAscDesc();
+      drawParams(sortParam);
     });
-    tr1.append(th1, th2, th3, th4, th5);
+    tr1.append(th, th1, th2, th3, th4, th5);
     listWinners.append(tr1);
-
     wins.forEach(async (win: Win, id: number) => {
       const tr = document.createElement('tr');
-      const td1 = createElement('td', ['cell'], `${id + 1}`);
+      const td = createElement(
+        'td',
+        ['cell'],
+        `${(winPage - 1 > 0 ? String(winPage - 1) : '') + String(id + 1)}`
+      );
       const td2 = createElement('td', ['cell']);
       const car = await getCar(win.id);
       td2.innerHTML = carImage(car.color);
+      const td1 = createElement('td', ['cell'], `${car.id}`);
       const td3 = createElement('td', ['cell'], `${car.name}`);
       const td4 = createElement('td', ['cell'], `${win.wins}`);
       const td5 = createElement('td', ['cell'], `${win.time}`);
-      tr.append(td1, td2, td3, td4, td5);
+      tr.append(td, td1, td2, td3, td4, td5);
       listWinners.append(tr);
     });
     document.body.append(listWinners);
