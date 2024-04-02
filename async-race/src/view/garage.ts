@@ -348,7 +348,7 @@ export async function winnersInit(): Promise<void> {
   const pageN = createElement('h2', ['pageN'], `Page #${winPage}`);
   settingsDiv.append(btnDiv, title, pageN);
   document.body.append(settingsDiv);
-  getWinners(winPage, winPageLimit, sortParam, ascdesc);
+  getWinners(winPage, winPageLimit, sortParam);
 
   async function drawWinners(): Promise<void> {
     const wins = (await getWinners(winPage, winPageLimit, sortParam, ascdesc)) as Win[];
@@ -384,25 +384,13 @@ export async function winnersInit(): Promise<void> {
     const tr1 = document.createElement('tr');
     const th = createElement('th', ['th', 'th'], 'Number');
     const th1 = createElement('th', ['th', 'heading', 'carNumber'], 'Car No.');
-    th1.addEventListener('click', async () => {
-      sortParam = 'id';
-      toggleAscDesc();
-      drawParams(sortParam);
-    });
+
     const th2 = createElement('th', ['th'], 'Car');
     const th3 = createElement('th', ['th'], 'Name');
     const th4 = createElement('th', ['th', 'heading', 'carWins'], 'Wins');
-    th4.addEventListener('click', async () => {
-      sortParam = 'wins';
-      toggleAscDesc();
-      drawParams(sortParam);
-    });
+
     const th5 = createElement('th', ['th', 'heading', 'bestTime'], `Best time (seconds)`);
-    th5.addEventListener('click', async () => {
-      sortParam = 'time';
-      toggleAscDesc();
-      drawParams(sortParam);
-    });
+
     tr1.append(th, th1, th2, th3, th4, th5);
     listWinners.append(tr1);
     wins.forEach(async (win: Win, id: number) => {
@@ -426,6 +414,23 @@ export async function winnersInit(): Promise<void> {
     const winsCount3 = (await getWinnersCount()) as number;
     checkPagination(winsCount3, winPage, winPageLimit);
 
+    th1.addEventListener('click', () => {
+      sortParam = 'id';
+      toggleAscDesc();
+      drawParams(sortParam);
+    });
+
+    th4.addEventListener('click', () => {
+      sortParam = 'wins';
+      toggleAscDesc();
+      drawParams(sortParam);
+    });
+
+    th5.addEventListener('click', () => {
+      sortParam = 'time';
+      toggleAscDesc();
+      drawParams(sortParam);
+    });
     if (sortParam === 'id') {
       th1.textContent += arrowAscDesc(ascdesc);
     } else if (sortParam === 'wins') {
